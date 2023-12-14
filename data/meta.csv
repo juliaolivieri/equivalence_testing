@@ -1,0 +1,37 @@
+Experiment Accession,Experiment Title,Organism Name,Sample Accession,Experiment,Run,avgLength,LibraryLayout,stage,cell
+SRX19324858,Single anther pollen RNA-seq: A. thaliana tricellular pollen,Arabidopsis thaliana,SRS16722806,SRX19324858,SRR23387021,202,PAIRED, A. thaliana tricellular pollen,SRR23387021
+SRX19324857,Single anther pollen RNA-seq: A. thaliana tricellular pollen,Arabidopsis thaliana,SRS16722806,SRX19324857,SRR23387022,202,PAIRED, A. thaliana tricellular pollen,SRR23387022
+SRX19324856,Single anther pollen RNA-seq: A. thaliana bicellular pollen,Arabidopsis thaliana,SRS16722813,SRX19324856,SRR23387023,202,PAIRED, A. thaliana bicellular pollen,SRR23387023
+SRX19324855,Single anther pollen RNA-seq: A. thaliana bicellular pollen,Arabidopsis thaliana,SRS16722813,SRX19324855,SRR23387024,202,PAIRED, A. thaliana bicellular pollen,SRR23387024
+SRX19324854,Single anther pollen RNA-seq: A. thaliana bicellular pollen,Arabidopsis thaliana,SRS16722813,SRX19324854,SRR23387025,202,PAIRED, A. thaliana bicellular pollen,SRR23387025
+SRX19324853,Single anther pollen RNA-seq: A. thaliana bicellular pollen,Arabidopsis thaliana,SRS16722813,SRX19324853,SRR23387026,202,PAIRED, A. thaliana bicellular pollen,SRR23387026
+SRX19324852,Unenriched single anther pollen RNA-seq: A. thaliana tricellular pollen,Arabidopsis thaliana,SRS16722812,SRX19324852,SRR23387027,100,SINGLE, A. thaliana tricellular pollen,SRR23387027
+SRX19324851,Unenriched single anther pollen RNA-seq: A. thaliana bicellular pollen,Arabidopsis thaliana,SRS16722811,SRX19324851,SRR23387028,100,SINGLE, A. thaliana bicellular pollen,SRR23387028
+SRX19324850,Unenriched single anther pollen RNA-seq: A. thaliana polarised uninucleate microspore,Arabidopsis thaliana,SRS16722810,SRX19324850,SRR23387029,100,SINGLE, A. thaliana polarised uninucleate microspore,SRR23387029
+SRX19324849,Unenriched single anther pollen RNA-seq: A. thaliana uninucleate microspore,Arabidopsis thaliana,SRS16722809,SRX19324849,SRR23387030,100,SINGLE, A. thaliana uninucleate microspore,SRR23387030
+SRX19324848,Unenriched single anther pollen RNA-seq: A. thaliana tricellular pollen,Arabidopsis thaliana,SRS16722812,SRX19324848,SRR23387031,100,SINGLE, A. thaliana tricellular pollen,SRR23387031
+SRX19324847,Unenriched single anther pollen RNA-seq: A. thaliana bicellular pollen,Arabidopsis thaliana,SRS16722811,SRX19324847,SRR23387032,100,SINGLE, A. thaliana bicellular pollen,SRR23387032
+SRX19324846,Single anther pollen RNA-seq: A. thaliana uninucleate microspore,Arabidopsis thaliana,SRS16722805,SRX19324846,SRR23387033,302,PAIRED, A. thaliana uninucleate microspore,SRR23387033
+SRX19324845,Unenriched single anther pollen RNA-seq: A. thaliana polarised uninucleate microspore,Arabidopsis thaliana,SRS16722810,SRX19324845,SRR23387034,100,SINGLE, A. thaliana polarised uninucleate microspore,SRR23387034
+SRX19324844,Unenriched single anther pollen RNA-seq: A. thaliana uninucleate microspore,Arabidopsis thaliana,SRS16722809,SRX19324844,SRR23387035,100,SINGLE, A. thaliana uninucleate microspore,SRR23387035
+SRX19324843,Unenriched single anther pollen RNA-seq: A. thaliana tricellular pollen,Arabidopsis thaliana,SRS16722812,SRX19324843,SRR23387036,100,SINGLE, A. thaliana tricellular pollen,SRR23387036
+SRX19324842,Unenriched single anther pollen RNA-seq: A. thaliana bicellular pollen,Arabidopsis thaliana,SRS16722811,SRX19324842,SRR23387037,100,SINGLE, A. thaliana bicellular pollen,SRR23387037
+SRX19324841,Unenriched single anther pollen RNA-seq: A. thaliana polarised uninucleate microspore,Arabidopsis thaliana,SRS16722810,SRX19324841,SRR23387038,100,SINGLE, A. thaliana polarised uninucleate microspore,SRR23387038
+SRX19324840,Unenriched single anther pollen RNA-seq: A. thaliana uninucleate microspore,Arabidopsis thaliana,SRS16722809,SRX19324840,SRR23387039,100,SINGLE, A. thaliana uninucleate microspore,SRR23387039
+SRX19324839,Unenriched single anther pollen RNA-seq: A. thaliana tricellular pollen,Arabidopsis thaliana,SRS16722812,SRX19324839,SRR23387040,100,SINGLE, A. thaliana tricellular pollen,SRR23387040
+SRX19324838,Unenriched single anther pollen RNA-seq: A. thaliana bicellular pollen,Arabidopsis thaliana,SRS16722811,SRX19324838,SRR23387041,100,SINGLE, A. thaliana bicellular pollen,SRR23387041
+SRX19324837,Unenriched single anther pollen RNA-seq: A. thaliana polarised uninucleate microspore,Arabidopsis thaliana,SRS16722810,SRX19324837,SRR23387042,100,SINGLE, A. thaliana polarised uninucleate microspore,SRR23387042
+SRX19324836,Unenriched single anther pollen RNA-seq: A. thaliana uninucleate microspore,Arabidopsis thaliana,SRS16722809,SRX19324836,SRR23387043,100,SINGLE, A. thaliana uninucleate microspore,SRR23387043
+SRX19324835,Single anther pollen RNA-seq: A. thaliana uninucleate microspore,Arabidopsis thaliana,SRS16722805,SRX19324835,SRR23387044,202,PAIRED, A. thaliana uninucleate microspore,SRR23387044
+SRX19324834,Single anther pollen RNA-seq: A. chinensis bicellular pollen,Actinidia chinensis var. chinensis,SRS16722808,SRX19324834,SRR23387045,252,PAIRED, A. chinensis bicellular pollen,SRR23387045
+SRX19324833,Single anther pollen RNA-seq: A. chinensis bicellular pollen,Actinidia chinensis var. chinensis,SRS16722808,SRX19324833,SRR23387046,252,PAIRED, A. chinensis bicellular pollen,SRR23387046
+SRX19324832,Single anther pollen RNA-seq: A. chinensis bicellular pollen,Actinidia chinensis var. chinensis,SRS16722808,SRX19324832,SRR23387047,252,PAIRED, A. chinensis bicellular pollen,SRR23387047
+SRX19324831,Single anther pollen RNA-seq: A. chinensis bicellular pollen,Actinidia chinensis var. chinensis,SRS16722808,SRX19324831,SRR23387048,252,PAIRED, A. chinensis bicellular pollen,SRR23387048
+SRX19324830,Single anther pollen RNA-seq: A. chinensis uninucleate microspore,Actinidia chinensis var. chinensis,SRS16722807,SRX19324830,SRR23387049,252,PAIRED, A. chinensis uninucleate microspore,SRR23387049
+SRX19324829,Single anther pollen RNA-seq: A. chinensis uninucleate microspore,Actinidia chinensis var. chinensis,SRS16722807,SRX19324829,SRR23387050,252,PAIRED, A. chinensis uninucleate microspore,SRR23387050
+SRX19324828,Single anther pollen RNA-seq: A. chinensis uninucleate microspore,Actinidia chinensis var. chinensis,SRS16722807,SRX19324828,SRR23387051,252,PAIRED, A. chinensis uninucleate microspore,SRR23387051
+SRX19324827,Single anther pollen RNA-seq: A. chinensis uninucleate microspore,Actinidia chinensis var. chinensis,SRS16722807,SRX19324827,SRR23387052,252,PAIRED, A. chinensis uninucleate microspore,SRR23387052
+SRX19324826,Single anther pollen RNA-seq: A. thaliana tricellular pollen,Arabidopsis thaliana,SRS16722806,SRX19324826,SRR23387053,302,PAIRED, A. thaliana tricellular pollen,SRR23387053
+SRX19324825,Single anther pollen RNA-seq: A. thaliana tricellular pollen,Arabidopsis thaliana,SRS16722806,SRX19324825,SRR23387054,202,PAIRED, A. thaliana tricellular pollen,SRR23387054
+SRX19324824,Single anther pollen RNA-seq: A. thaliana uninucleate microspore,Arabidopsis thaliana,SRS16722805,SRX19324824,SRR23387055,202,PAIRED, A. thaliana uninucleate microspore,SRR23387055
+SRX19324823,Single anther pollen RNA-seq: A. thaliana uninucleate microspore,Arabidopsis thaliana,SRS16722805,SRX19324823,SRR23387056,202,PAIRED, A. thaliana uninucleate microspore,SRR23387056
