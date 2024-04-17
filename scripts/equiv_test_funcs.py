@@ -56,7 +56,7 @@ def plot_groups(group1_vals, group2_vals):
     plt.title("difference in means: {:.3f}".format(mean1 - mean2))
     plt.close()
 
-def loop_over_genes(df, delta, plot):
+def loop_over_genes(df, delta, plot = False):
   grouped_df = df.groupby("cell_type")
   
   out = {"gene" : [], "nnz_group1" : [], "nnz_group2" : [], "avg_group1" : [], 
@@ -121,4 +121,18 @@ def plot_results(out_df, outpath, dataname, delta):
   plt.savefig("{}{}_{}_comparison.png".format(outpath, dataname, delta))
   plt.close()
 
+def perform_tests_for_df(df, delta, verbose = True):
+  out_df = loop_over_genes(df, delta)
+  out_df = process_out_df(out_df)
 
+  num_genes = out_df.shape[0]
+  sig_equiv = out_df["sig_equiv"].sum()
+  sig_diff = out_df["sig_diff"].sum()
+  sig_both = out_df["sig_both"].sum()
+  sig_neither = (~(out_df["sig_diff"] | out_df["sig_equiv"])).sum()
+  
+  if verbose:
+    print("\nnum_genes: {}\n# equivalent: {}\n# different: {}\n# both: {}\n# neither: {}\n".format(num_genes, sig_equiv, sig_diff, sig_both, sig_neither))
+  
+  return num_genes, sig_equiv, sig_diff, sig_both, sig_neither
+  
