@@ -46,6 +46,9 @@ def main():
   # save metadata for genes
   data.var.to_csv("{}{}{}_genes.csv".format(outpath, dataname, type_suff))
 
+  # save metadata for cells
+  data.obs.to_csv("{}{}{}_meta.csv".format(outpath, dataname, type_suff))
+
   # create pandas dataframe with just the selected data and save it
   df = pd.DataFrame.sparse.from_spmatrix(data.X, columns=data.var["feature_name"], index=data.obs.index)
   df.to_csv("{}{}{}_data.csv".format(outpath, dataname, type_suff))
