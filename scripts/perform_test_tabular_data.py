@@ -11,6 +11,13 @@ args = get_args()
 
 df = pd.read_csv(args.infile, index_col = 0)
 
+if args.normalize:
+  # normalize each row (sample) by the number of counts
+  df = normalize(df)
+
+if args.log_scale:
+  df = log2_scale(df)
+
 plot = False
 
 # testing out function you can use in Python code
