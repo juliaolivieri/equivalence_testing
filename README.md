@@ -23,7 +23,7 @@ Or you can run the command itself. For example:
 python perform_test_tabular_data.py \
         --savename monocyte_raw \
         --outpath results/ \
-        --infile HLCA_normal_1000_classical-monocyte_non-classical-monocyte_1000_100_raw.csv \
+        --infile test_data/HLCA_normal_1000_classical-monocyte_non-classical-monocyte_1000_100_raw.csv \
         --delta 1 \
         --log_scale
 
