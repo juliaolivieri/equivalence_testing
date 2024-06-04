@@ -94,10 +94,14 @@ def loop_over_genes(df, delta, plot = False):
   return pd.DataFrame(out)
 
 def process_out_df(out_df, delta):
-  out_df.dropna(inplace=True)
+#  out_df.dropna(inplace=True)
   out_df["eff_size"] = (out_df["avg_group1"] - out_df["avg_group2"]).abs()
   for pval in ["diff", "equiv"]:
-      out_df["{}_pval_adj".format(pval)] = multitest.multipletests(out_df["{}_pval".format(pval)], method="fdr_bh")[1]
+      try:
+        out_df["{}_pval_adj".format(pval)] = multitest.multipletests(out_df["{}_pval".format(pval)], method="fdr_bh")[1]
+      except:
+        print(out_df)
+
       out_df["sig_{}".format(pval)] = False
       out_df.loc[out_df["{}_pval_adj".format(pval)] < 0.05, "sig_{}".format(pval)] = True
 
