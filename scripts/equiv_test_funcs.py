@@ -12,11 +12,23 @@ def get_args():
   parser.add_argument('--outpath', type=str, help = 'path to save files', default="")
   parser.add_argument('--infile', type=str, help = 'path to file to analyze')
   parser.add_argument('--delta', type=float, help = 'delta value to use', default=0.05)
+  parser.add_argument('--log_scale', action="store_true", help = 'include if you want your data to be log2 scaled')
+  parser.add_argument('--normalize', action="store_true", help = 'normalize each sample gene-wise')
+
   args = parser.parse_args()
   return args
 
+def normalize(df):
+  df.iloc[:,:-1] = df.iloc[:,:-1].div(df.iloc[:,:-1].sum(axis=1), axis=0)
+  return df
+
+
+def log2_scale(df):
+  df.iloc[:,:-1] = np.log2(df.iloc[:,:-1].replace(0,1))
+  return df
 
 def perform_t_tests(group1_vals, group2_vals, delta):
+
     mean1 = np.mean(group1_vals)
     mean2 = np.mean(group2_vals)
     
@@ -81,14 +93,17 @@ def loop_over_genes(df, delta, plot = False):
   
   return pd.DataFrame(out)
 
-def process_out_df(out_df):
+def process_out_df(out_df, delta):
   out_df.dropna(inplace=True)
+  out_df["eff_size"] = (out_df["avg_group1"] - out_df["avg_group2"]).abs()
   for pval in ["diff", "equiv"]:
       out_df["{}_pval_adj".format(pval)] = multitest.multipletests(out_df["{}_pval".format(pval)], method="fdr_bh")[1]
       out_df["sig_{}".format(pval)] = False
       out_df.loc[out_df["{}_pval_adj".format(pval)] < 0.05, "sig_{}".format(pval)] = True
-      
-  out_df["sig_both"] = out_df["sig_diff"] & out_df["sig_equiv"]
+
+  # include effect size filter on significance
+  out_df.loc[out_df["eff_size"] <= delta, "sig_diff"] = False    
+  out_df.loc[out_df["eff_size"] > delta, "sig_equiv"] = False    
   return out_df
 
 def plot_results(out_df, outpath, dataname, delta):
@@ -121,18 +136,22 @@ def plot_results(out_df, outpath, dataname, delta):
   plt.savefig("{}{}_{}_comparison.png".format(outpath, dataname, delta))
   plt.close()
 
-def perform_tests_for_df(df, delta, verbose = True):
-  out_df = loop_over_genes(df, delta)
-  out_df = process_out_df(out_df)
-
+def summarize_df_significance(out_df, delta, verbose = True):
   num_genes = out_df.shape[0]
   sig_equiv = out_df["sig_equiv"].sum()
   sig_diff = out_df["sig_diff"].sum()
-  sig_both = out_df["sig_both"].sum()
   sig_neither = (~(out_df["sig_diff"] | out_df["sig_equiv"])).sum()
   
   if verbose:
-    print("\nnum_genes: {}\n# equivalent: {}\n# different: {}\n# both: {}\n# neither: {}\n".format(num_genes, sig_equiv, sig_diff, sig_both, sig_neither))
-  
-  return num_genes, sig_equiv, sig_diff, sig_both, sig_neither
+    print("\nnum_genes: {}\n# equivalent (eff <= {}): {}\n# different (eff > {}): {}\n# neither: {}\n".format(num_genes, delta, sig_equiv, delta, sig_diff, sig_neither))
+
+  return num_genes, sig_equiv, sig_diff, sig_neither
+
+
+def perform_tests_for_df(df, delta, verbose = True):
+  out_df = loop_over_genes(df, delta)
+  out_df = process_out_df(out_df, delta)
+  num_genes, sig_equiv, sig_diff, sig_neither = summarize_df_significance(out_df, delta, verbose)
+
+  return num_genes, sig_equiv, sig_diff, sig_neither
   
