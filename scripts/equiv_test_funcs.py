@@ -1,4 +1,5 @@
 import argparse
+import math
 import matplotlib.pyplot as plt
 import statsmodels.stats.multitest as multitest
 from statsmodels.stats.proportion import proportion_confint
@@ -27,9 +28,6 @@ def normalize(df, scale = 100):
 def log2_scale(df):
   # add 1 to every entry (before log scaling)
   df.iloc[:,:-1] = np.log2(df.iloc[:,:-1] + 1)
-
-  # replace 0s with 1s
-  #df.iloc[:,:-1] = np.log2(df.iloc[:,:-1].replace(0,1))
   return df
 
 def perform_t_tests(group1_vals, group2_vals, delta):
@@ -40,6 +38,12 @@ def perform_t_tests(group1_vals, group2_vals, delta):
     # perform standard t-test (testing for difference)
     # consider switching to Welch's t-test (current assumes equal variances)
     diff_pval = stats.ttest_ind(a=group1_vals, b = group2_vals).pvalue
+    
+    if math.isnan(diff_pval):
+      print("is nan")
+      print(group1_vals)
+      print(group2_vals)
+      print(mean1, mean2)
 
     # get t statistics for equivalence test
     # (X1 - X2 - delta)/sqrt(s1^2/n1 + s2^2/n2)
@@ -59,6 +63,15 @@ def perform_t_tests(group1_vals, group2_vals, delta):
     p2 = stats.t.sf(t2, df)
 
     equiv_pval = np.max([p1, p2])
+
+    if math.isnan(equiv_pval):
+      print(t1)
+      print(t2)
+      print("denom",np.sqrt(np.var(group1_vals)/len(group1_vals)+np.var(group2_vals)/len(group2_vals)))
+      print("is nan equiv")
+      print(group1_vals)
+      print(group2_vals)
+      print(mean1, mean2)
 #     print("diff pvalue: {}\nequiv pvalue: {}".format(diff_pval, equiv_pval))
     return diff_pval, equiv_pval
 
@@ -99,7 +112,11 @@ def loop_over_genes(df, delta, plot = False):
   return pd.DataFrame(out)
 
 def process_out_df(out_df, delta):
-#  out_df.dropna(inplace=True)
+
+
+  # need to deal with NAs somehow
+  print(out_df)
+  out_df.dropna(inplace=True)
 
   out_df["eff_size"] = (out_df["avg_group1"] - out_df["avg_group2"]).abs()
   for pval in ["diff", "equiv"]:
