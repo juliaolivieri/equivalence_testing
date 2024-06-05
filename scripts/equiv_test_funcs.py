@@ -18,8 +18,8 @@ def get_args():
   args = parser.parse_args()
   return args
 
-def normalize(df):
-  df.iloc[:,:-1] = df.iloc[:,:-1].div(df.iloc[:,:-1].sum(axis=1), axis=0)
+def normalize(df, scale = 100):
+  df.iloc[:,:-1] = 100*df.iloc[:,:-1].div(df.iloc[:,:-1].sum(axis=1), axis=0)
   return df
 
 
@@ -78,7 +78,7 @@ def loop_over_genes(df, delta, plot = False):
   out = {"gene" : [], "nnz_group1" : [], "nnz_group2" : [], "avg_group1" : [], 
          "avg_group2" : [], "diff_pval" : [], "equiv_pval" : []}
   
-  for gene in tqdm.tqdm([x for x in df.columns if x != "cell_type"]):
+  for gene in [x for x in df.columns if x != "cell_type"]:
   
       samples = grouped_df[gene].apply(list)
       diff_pval, equiv_pval = perform_t_tests(samples[0], samples[1], delta)
@@ -99,6 +99,7 @@ def loop_over_genes(df, delta, plot = False):
 
 def process_out_df(out_df, delta):
 #  out_df.dropna(inplace=True)
+
   out_df["eff_size"] = (out_df["avg_group1"] - out_df["avg_group2"]).abs()
   for pval in ["diff", "equiv"]:
       try:
@@ -154,6 +155,7 @@ def summarize_df_significance(out_df, delta, verbose = True):
     print("\nnum_genes: {}\n# equivalent (eff <= {}): {}\n# different (eff > {}): {}\n# neither: {}\n".format(num_genes, delta, sig_equiv, delta, sig_diff, sig_neither))
 
   return num_genes, sig_equiv, sig_diff, sig_neither
+
 
 
 def perform_tests_for_df(df, delta, verbose = True):
