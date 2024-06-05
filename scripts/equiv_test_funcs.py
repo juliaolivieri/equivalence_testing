@@ -24,7 +24,11 @@ def normalize(df):
 
 
 def log2_scale(df):
-  df.iloc[:,:-1] = np.log2(df.iloc[:,:-1].replace(0,1))
+  # add 1 to every entry (before log scaling)
+  df.iloc[:,:-1] = np.log2(df.iloc[:,:-1] + 1)
+
+  # replace 0s with 1s
+  #df.iloc[:,:-1] = np.log2(df.iloc[:,:-1].replace(0,1))
   return df
 
 def perform_t_tests(group1_vals, group2_vals, delta):
