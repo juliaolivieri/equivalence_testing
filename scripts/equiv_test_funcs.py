@@ -1,6 +1,7 @@
 import argparse
 import matplotlib.pyplot as plt
 import statsmodels.stats.multitest as multitest
+from statsmodels.stats.proportion import proportion_confint
 import numpy as np
 import pandas as pd
 import scipy.stats as stats
@@ -165,3 +166,120 @@ def perform_tests_for_df(df, delta, verbose = True):
 
   return num_genes, sig_equiv, sig_diff, sig_neither
   
+############################################################
+############################################################
+##########                                        ##########
+##########            For Simulation              ##########
+##########                                        ##########
+############################################################
+############################################################
+
+def ttests(df, delta, norm, log_scale):
+    
+    # run t tests from script (should be what's done in perform tests)
+
+    if norm:
+      # normalize each row (sample) by the number of counts
+        df = normalize(df)
+
+    if log_scale:
+        df = log2_scale(df)
+
+    plot = False
+
+    # testing out function you can use in Python code
+    # perform_tests_for_df(df, args.delta)
+
+    out_df = loop_over_genes(df, delta, plot)
+
+    out_df = process_out_df(out_df, delta)
+
+    return out_df["sig_diff"][0], out_df["sig_equiv"][0]
+
+def simulate(numReads, num_trials, geneA_fracs, num_samples, delta, norm = True, log_scale = True, seed = 123):
+    np.random.seed(seed)
+
+    out = {"numReads" : [], "frac_sig_diff" : [], "frac_sig_diff_lower" : [], "frac_sig_diff_upper" : [], 
+           "frac_sig_equiv" : [], "frac_sig_equiv_lower" : [], "frac_sig_equiv_upper" : [], 
+           "frac_sig_inc" : [], "frac_sig_inc_lower" : [], "frac_sig_inc_upper" : []}
+
+    for num in numReads:
+        print("num reads: {}".format(num))
+        # collect p vals for each
+        num_sig_diff = 0
+        num_sig_equiv = 0
+        num_inconclusive = 0
+
+        for i in range(num_trials):
+            data = {"sample" : [], "A" : [], "B" : [], "cell_type" : []}
+            count = 0
+            for j in range(len(geneA_fracs)):
+                for k in range(num_samples):
+                    count += 1
+
+                    # add 1 so it's never zero
+                    n = np.random.poisson(num) + 1
+                    A = np.random.binomial(n, geneA_fracs[j])
+                    data["sample"].append("sample" + str(count))
+                    data["A"].append(A)
+                    data["B"].append(n - A)
+                    data["cell_type"].append(j)
+            df = pd.DataFrame(data).set_index("sample")
+
+            # get results
+            diff_sig, equiv_sig = ttests(df, norm, log_scale, delta)
+
+            # save output
+            num_sig_diff += diff_sig
+            num_sig_equiv += equiv_sig
+            num_inconclusive += 1 - diff_sig - equiv_sig
+
+        # get frac significant
+        out["numReads"].append(num)
+
+    #    num_sig_diff = sum(1 for p in diff_pvals if p < alpha)
+        lower_ci, upper_ci = proportion_confint(num_sig_diff, num_trials)
+        out["frac_sig_diff"].append(num_sig_diff/num_trials)
+        out["frac_sig_diff_lower"].append(lower_ci)
+        out["frac_sig_diff_upper"].append(upper_ci)
+
+    #    num_sig_equiv = sum(1 for p in equiv_pvals if p < alpha)
+        lower_ci, upper_ci = proportion_confint(num_sig_equiv, num_trials)
+        out["frac_sig_equiv"].append(num_sig_equiv/num_trials)
+        out["frac_sig_equiv_lower"].append(lower_ci)
+        out["frac_sig_equiv_upper"].append(upper_ci)
+
+
+    #    num_sig_equiv = sum(1 for p in equiv_pvals if p < alpha)
+        lower_ci, upper_ci = proportion_confint(num_inconclusive, num_trials)
+        out["frac_sig_inc"].append(num_inconclusive/num_trials)
+        out["frac_sig_inc_lower"].append(lower_ci)
+        out["frac_sig_inc_upper"].append(upper_ci)
+    #print(out)
+    out = pd.DataFrame(out)
+    display(out)
+    
+    max_cols = out[["frac_sig_diff", "frac_sig_equiv", "frac_sig_inc"]].idxmax(axis=1)
+    winning_col = max_cols.iloc[-1]
+
+    winning_numReads = out.loc[len(max_cols[~(max_cols == winning_col)]), "numReads"]
+    
+    return out, winning_col, winning_numReads
+
+def plot_sim(out, geneA_fracs, delta, outpath):
+    plt.errorbar(out["numReads"], out["frac_sig_diff"], yerr = [out["frac_sig_diff"] - out["frac_sig_diff_lower"],
+            out["frac_sig_diff_upper"] - out["frac_sig_diff"] ], marker = "o", label = "diff")
+    plt.errorbar(out["numReads"], out["frac_sig_equiv"], yerr = [out["frac_sig_equiv"] - out["frac_sig_equiv_lower"],
+                out["frac_sig_equiv_upper"] - out["frac_sig_equiv"] ], marker = "o", label = "equiv")
+    plt.errorbar(out["numReads"], out["frac_sig_inc"], yerr = [out["frac_sig_inc"] - out["frac_sig_inc_lower"],
+                out["frac_sig_inc_upper"] - out["frac_sig_inc"] ], marker = "o", label = "inc")
+    plt.xscale("log")
+    plt.axhline(y=0.05, linestyle="--", color="k", label = "$y = 0.05$")
+    plt.axhline(y=0.0, color="k")
+
+    plt.legend()
+    plt.xlabel("number of reads")
+    plt.ylabel("fraction called in category")
+    plt.title("gene A pop 1: {}\ngene A pop 2: {}\nDelta: {}".format(geneA_fracs[0], geneA_fracs[1], delta))
+    plt.savefig("{}pop1_{}_pop2_{}_delt_{}.png".format(outpath, *geneA_fracs, delta),bbox_inches='tight')
+    plt.show()
