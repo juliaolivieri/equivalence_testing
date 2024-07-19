@@ -33,10 +33,11 @@ def log2_scale(df):
   return df
 
 def perform_t_tests(group1_vals, group2_vals, delta):
-
+    #try:
     mean1 = np.mean(group1_vals)
     mean2 = np.mean(group2_vals)
-    
+    #except:
+    #  print("ERROR\n{}\n{}".format(group1_vals, group2_vals))
     # perform standard t-test (testing for difference)
     # consider switching to Welch's t-test (current assumes equal variances)
     diff_pval = stats.ttest_ind(a=group1_vals, b = group2_vals).pvalue
@@ -94,7 +95,7 @@ def loop_over_genes(df, delta, plot = False):
   out = {"gene" : [], "nnz_group1" : [], "nnz_group2" : [], "avg_group1" : [], 
          "avg_group2" : [], "diff_pval" : [], "equiv_pval" : []}
   
-  for gene in [x for x in df.columns if x != "cell_type"]:
+  for gene in [x for x in df.columns if x != "condition"]:
   
       samples = grouped_df[gene].apply(list)
       diff_pval, equiv_pval = perform_t_tests(samples[0], samples[1], delta)

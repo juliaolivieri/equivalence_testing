@@ -25,6 +25,10 @@ if args.log_scale:
 
 plot = False
 
+# Remove columns that are all zero
+nnz = (~(df == 0).all())
+df = df[nnz[nnz].index]
+
 # testing out function you can use in Python code
 # perform_tests_for_df(df, args.delta)
 
