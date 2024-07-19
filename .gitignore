@@ -4,3 +4,5 @@ notebooks/output/
 scripts/submission_scripts/job_output/
 plots/
 *.pyc
+.DS_Store
+scripts/__pycache__/
