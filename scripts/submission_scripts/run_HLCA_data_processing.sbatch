@@ -11,8 +11,14 @@ conda activate jup_env
 #CT1="'classical monocyte'"
 #CT2="'non-classical monocyte'"
 
-CT1="'alveolar macrophage'"
-CT2="'elicited macrophage'"
+#CT1b="'classical-monocyte'"
+#CT2b="'non-classical-monocyte'"
+
+#CT1="'alveolar macrophage'"
+#CT2="'elicited macrophage'"
+
+#CT1b="'alveolar-macrophage'"
+#CT2b="'elicited-macrophage'"
 
 #CT1="'type I pneumocyte'"
 #CT2="'type II pneumocyte'"
@@ -20,11 +26,22 @@ CT2="'elicited macrophage'"
 #CT1="'capillary endothelial cell'"
 #CT2="'mast cell'"
 
+#CT1b="'capillary-endothelial-cell'"
+#CT2b="'mast-cell'"
+
 #CT1="'CD4-positive, alpha-beta T cell'"
 #CT2="'CD8-positive, alpha-beta T cell'"
 
+#CT1b="'CD4-positive-alpha-beta-T-cell'"
+#CT2b="'CD8-positive-alpha-beta-T-cell'"
+
+
 #CT1="'ciliated columnar cell of tracheobronchial tree'"
 #CT2="'CD8-positive, alpha-beta T cell'"
+#
+#CT1b="'ciliated-columnar-cell-of-tracheobronchial-tree'"
+#CT2b="'CD8-positive-alpha-beta-T-cell'"
+
 
 GENE_CUTOFF=1000
 
@@ -32,18 +49,18 @@ a="python -u ../HLCA_data_processing.py --cell_types ${CT1} ${CT2} --gene_cutoff
 
 date
 echo $a
-eval $a
+#eval $a
 date
 
 NUM_CELLS=1000
-NUM_GENES=100
-DATANAME="HLCA_normal_1000_alveolar-macrophage_elicited-macrophage"
+NUM_GENES=100000
+DATANAME="HLCA_normal_1000_${CT1b}_${CT2b}"
 #DATANAME="HLCA_normal_${GENE_CUTOFF}_ciliated-columnar-cell-of-tracheobronchial-tree_CD8-positive-alpha-beta-T-cell"
 #DATANAME="HLCA_normal_1000_classical-monocyte_non-classical-monocyte"
 #DATANAME="HLCA_normal_1000_ciliated-columnar-cell-of-tracheobronchial-tree_CD8-positive-alpha-beta-T-cell"
 #DATANAME="HLCA_normal_1000_capillary-endothelial-cell_mast-cell"
 
-a="python -u ../sample_tabular_data.py --num_cells ${NUM_CELLS} --num_genes ${NUM_GENES} --dataname ${DATANAME} --raw"
+a="python -u ../sample_tabular_data.py --num_cells ${NUM_CELLS} --num_genes ${NUM_GENES} --dataname ${DATANAME} --raw --all_genes --all_cells"
 
 date
 echo $a
