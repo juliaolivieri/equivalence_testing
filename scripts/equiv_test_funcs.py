@@ -13,6 +13,8 @@ def get_args():
   parser.add_argument('--savename', type=str, help = 'dataname to process')
   parser.add_argument('--outpath', type=str, help = 'path to save files', default="")
   parser.add_argument('--infile', type=str, help = 'path to file to analyze')
+  parser.add_argument('--meta', type=str, help = 'metadata to analyze')
+  parser.add_argument('--condition', type=str, help = 'column of metadata to use for differential analysis')
   parser.add_argument('--delta', type=float, help = 'delta value to use', default=0.05)
   parser.add_argument('--log_scale', action="store_true", help = 'include if you want your data to be log2 scaled')
   parser.add_argument('--normalize', action="store_true", help = 'normalize each sample gene-wise')
@@ -87,7 +89,7 @@ def plot_groups(group1_vals, group2_vals):
     plt.close()
 
 def loop_over_genes(df, delta, plot = False):
-  grouped_df = df.groupby("cell_type")
+  grouped_df = df.groupby("condition")
   
   out = {"gene" : [], "nnz_group1" : [], "nnz_group2" : [], "avg_group1" : [], 
          "avg_group2" : [], "diff_pval" : [], "equiv_pval" : []}

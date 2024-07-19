@@ -9,7 +9,12 @@ from equiv_test_funcs import *
 
 args = get_args()
 
-df = pd.read_csv(args.infile, index_col = 0)
+df = pd.read_csv(args.infile, index_col = 0).T
+
+meta = pd.read_csv(args.meta, index_col = 0)
+
+df["condition"] = df.index.map({k : v for k, v in zip(meta.index, meta[args.condition])})
+
 
 if args.normalize:
   # normalize each row (sample) by the number of counts
