@@ -14,6 +14,9 @@ data <- read.csv(data_path, header=T, row.names=1)
 
 meta <- read.csv(meta_path, header=T, row.names=1)
 
+# subset data to only samples in metadata
+data <- data[rownames(meta)] 
+
 ### Check classes of the data we just brought in
 class(data)
 class(meta)
