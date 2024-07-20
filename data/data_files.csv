@@ -1,0 +1,4 @@
+id,data_path,meta_path,twocat_meta_path,meta_column,species,description
+GSE206932,~/Desktop/Research/Datasets/GSE206932_merged.counts.bulk.csv,~/Desktop/Research/Datasets/GSE206932_meta.csv,~/Desktop/Research/Datasets/GSE206932_meta.csv,age,Mus musculus,traumatic brain injury in mice of different ages
+GSE134296,~/Desktop/Research/Datasets/GSE134296_Matrix_Table_of_Processed_Data_FPKM_edited_trackid.csv,~/Desktop/Research/Datasets/GSE134296_meta.csv,~/Desktop/Research/Datasets/GSE134296_meta.csv,experimental_condition,Mus musculus,FOXC2-deficient B16-F1 Melanomas
+GSE117891,~/Desktop/Research/Datasets/GSE117891_all_6148.umi.count.matrix.csv,~/Desktop/Research/Datasets/GSE117891_meta.csv,~/Desktop/Research/Datasets/GSE117891_meta_twocat.csv,sample_type,Homo sapiens,Multiregional Glioma Single-Cell Transcriptomic Sequencing with peri-tumoral and tumoral cells three output categories

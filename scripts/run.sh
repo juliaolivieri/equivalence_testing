@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 
-DATANAME="GSE206932"
+DATANAME="GSE134296"
 INFILE="~/Desktop/Research/Datasets/GSE206932_merged.counts.bulk.csv"
 #INFILE="~/Desktop/Research/DESeq2/GSE206932_experimental_condition_normalized_counts.csv"
 META="~/Desktop/Research/Datasets/GSE206932_meta.csv"

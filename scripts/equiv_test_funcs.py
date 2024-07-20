@@ -173,7 +173,7 @@ def summarize_df_significance(out_df, delta, verbose = True):
   sig_neither = (~(out_df["sig_diff"] | out_df["sig_equiv"])).sum()
   
   if verbose:
-    print("\nnum_genes: {}\n# equivalent (eff <= {}): {}\n# different (eff > {}): {}\n# neither: {}\n".format(num_genes, delta, sig_equiv, delta, sig_diff, sig_neither))
+    print("\nnum_genes: {}\n# equivalent (eff <= {}): {} ({:.2f}%)\n# different (eff > {}): {} ({:.2f}%)\n# neither: {} ({:.2f}%)\n".format(num_genes, delta, sig_equiv, 100*sig_equiv/num_genes, delta, sig_diff, 100*sig_diff/num_genes, sig_neither, 100*sig_neither/num_genes))
 
   return num_genes, sig_equiv, sig_diff, sig_neither
 

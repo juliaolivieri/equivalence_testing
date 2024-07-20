@@ -13,6 +13,9 @@ df = pd.read_csv(args.infile, index_col = 0).T
 
 meta = pd.read_csv(args.meta, index_col = 0)
 
+# only include samples that are in the metadata
+df[df.index.isin(meta.index)]
+
 df["condition"] = df.index.map({k : v for k, v in zip(meta.index, meta[args.condition])})
 
 

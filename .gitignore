@@ -6,3 +6,4 @@ plots/
 *.pyc
 .DS_Store
 scripts/__pycache__/
+notebooks/Untitled*
