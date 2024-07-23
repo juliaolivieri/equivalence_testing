@@ -16,6 +16,8 @@ def get_args():
   parser.add_argument('--meta', type=str, help = 'metadata to analyze')
   parser.add_argument('--condition', type=str, help = 'column of metadata to use for differential analysis')
   parser.add_argument('--delta', type=float, help = 'delta value to use', default=0.05)
+  parser.add_argument('--epsilon', type=float, help = 'epsilon value to use (adding noise to counts)', default=1)
+  parser.add_argument('--random_seed', type=int, help = 'seed to use (adding noise adds randomness)', default=123)
   parser.add_argument('--log_scale', action="store_true", help = 'include if you want your data to be log2 scaled')
   parser.add_argument('--normalize', action="store_true", help = 'normalize each sample gene-wise')
 
@@ -32,7 +34,15 @@ def log2_scale(df):
   df.iloc[:,:-1] = np.log2(df.iloc[:,:-1] + 1)
   return df
 
-def perform_t_tests(group1_vals, group2_vals, delta):
+def perform_t_tests(group1_vals, group2_vals, delta, epsilon = .1):
+
+    # add noise to avoid divide by zero
+
+    noise1 = np.random.uniform(-epsilon, epsilon,len(group1_vals))
+    noise2 = np.random.uniform(-epsilon, epsilon,len(group2_vals))
+
+    group1_vals = [ x + y for x, y in zip(group1_vals, noise1)]
+    group2_vals = [ x + y for x, y in zip(group2_vals, noise2)]
     #try:
     mean1 = np.mean(group1_vals)
     mean2 = np.mean(group2_vals)
@@ -89,16 +99,16 @@ def plot_groups(group1_vals, group2_vals):
     plt.title("difference in means: {:.3f}".format(mean1 - mean2))
     plt.close()
 
-def loop_over_genes(df, delta, plot = False):
+def loop_over_genes(df, delta, epsilon, plot = False):
   grouped_df = df.groupby("condition")
   
-  out = {"gene" : [], "nnz_group1" : [], "nnz_group2" : [], "avg_group1" : [], 
-         "avg_group2" : [], "diff_pval" : [], "equiv_pval" : []}
+  out = {"gene" : [], "nnz_group1" : [], "nnz_group2" : [], "avg_group1_log2" : [], 
+         "avg_group2_log2" : [], "diff_pval" : [], "equiv_pval" : []}
   
   for gene in [x for x in df.columns if x != "condition"]:
   
       samples = grouped_df[gene].apply(list)
-      diff_pval, equiv_pval = perform_t_tests(samples[0], samples[1], delta)
+      diff_pval, equiv_pval = perform_t_tests(samples[0], samples[1], delta, epsilon)
       if plot and ((diff_pval < 0.05) or (equiv_pval > 0.05)):
           print(gene)
           plt.hist(df[gene])
@@ -107,8 +117,8 @@ def loop_over_genes(df, delta, plot = False):
       out["gene"].append(gene)
       out["nnz_group1"].append(np.count_nonzero(samples[0]))
       out["nnz_group2"].append(np.count_nonzero(samples[1]))
-      out["avg_group1"].append(np.mean(samples[0]))
-      out["avg_group2"].append(np.mean(samples[1]))
+      out["avg_group1_log2"].append(np.mean(samples[0]))
+      out["avg_group2_log2"].append(np.mean(samples[1]))
       out["diff_pval"].append(diff_pval)
       out["equiv_pval"].append(equiv_pval)
   
@@ -121,7 +131,15 @@ def process_out_df(out_df, delta):
   print(out_df)
   out_df.dropna(inplace=True)
 
-  out_df["eff_size"] = (out_df["avg_group1"] - out_df["avg_group2"]).abs()
+  # effect size
+  out_df["eff_size"] = (out_df["avg_group1_log2"] - out_df["avg_group2_log2"])
+
+  out_df["avg_group1"] = 2**out_df["avg_group1_log2"]
+  out_df["avg_group2"] = 2**out_df["avg_group2_log2"]
+
+  # fold change
+  out_df["fold_change"] = 2**out_df["eff_size"]
+
   for pval in ["diff", "equiv"]:
       try:
         out_df["{}_pval_adj".format(pval)] = multitest.multipletests(out_df["{}_pval".format(pval)], method="fdr_bh")[1]
@@ -132,8 +150,8 @@ def process_out_df(out_df, delta):
       out_df.loc[out_df["{}_pval_adj".format(pval)] < 0.05, "sig_{}".format(pval)] = True
 
   # include effect size filter on significance
-  out_df.loc[out_df["eff_size"] <= delta, "sig_diff"] = False    
-  out_df.loc[out_df["eff_size"] > delta, "sig_equiv"] = False    
+  out_df.loc[(-delta <= out_df["eff_size"]) & (out_df["eff_size"] <= delta), "sig_diff"] = False    
+  out_df.loc[(out_df["eff_size"] > delta) | (out_df["eff_size"] < -delta), "sig_equiv"] = False    
   return out_df
 
 def plot_results(out_df, outpath, dataname, delta):

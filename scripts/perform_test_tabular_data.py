@@ -9,13 +9,14 @@ from equiv_test_funcs import *
 
 args = get_args()
 
+np.random.seed(args.random_seed)
+
 df = pd.read_csv(args.infile, index_col = 0).T
 
 meta = pd.read_csv(args.meta, index_col = 0)
 
 # only include samples that are in the metadata
 df = df[df.index.isin(meta.index)]
-
 
 
 df["condition"] = df.index.map({k : v for k, v in zip(meta.index, meta[args.condition])})
@@ -32,14 +33,17 @@ if args.log_scale:
 
 plot = False
 
-# Remove columns that are all zero
-nnz = (~(df == 0).all())
-df = df[nnz[nnz].index]
+# Remove columns that have <= 1 nonzero entry
+#nnz = (~(df == 0).all())
+#df = df[nnz[nnz].index]
+nnz_plus = ((df !=0).sum() > 1)
+df = df[nnz_plus[nnz_plus].index]
 
+print(df.shape)
 # testing out function you can use in Python code
 # perform_tests_for_df(df, args.delta)
 
-out_df = loop_over_genes(df, args.delta, plot)
+out_df = loop_over_genes(df, args.delta, args.epsilon, plot)
 out_df = process_out_df(out_df, args.delta)
 
 plot_results(out_df, args.outpath, args.savename, args.delta)
