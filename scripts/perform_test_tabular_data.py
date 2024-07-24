@@ -21,6 +21,13 @@ df = df[df.index.isin(meta.index)]
 
 df["condition"] = df.index.map({k : v for k, v in zip(meta.index, meta[args.condition])})
 
+# Remove columns that have <= 1 nonzero entry
+# do in R script?
+#nnz = (~(df == 0).all())
+#df = df[nnz[nnz].index]
+nnz_plus = ((df !=0).sum() > 1)
+df = df[nnz_plus[nnz_plus].index]
+
 print("SUBSET DF")
 print(df.head)
 
@@ -33,11 +40,7 @@ if args.log_scale:
 
 plot = False
 
-# Remove columns that have <= 1 nonzero entry
-#nnz = (~(df == 0).all())
-#df = df[nnz[nnz].index]
-nnz_plus = ((df !=0).sum() > 1)
-df = df[nnz_plus[nnz_plus].index]
+
 
 print(df.shape)
 # testing out function you can use in Python code

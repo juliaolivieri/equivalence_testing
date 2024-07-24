@@ -1,6 +1,6 @@
 import pandas as pd
 
-identifier = "GSE206932"
+identifier = "HLCA_monocytes"
 
 data_files = pd.read_csv("../data/data_files.csv")
 
