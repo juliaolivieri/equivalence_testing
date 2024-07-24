@@ -1,6 +1,6 @@
 import pandas as pd
 
-identifier = "HLCA_monocytes"
+identifier = "GSE206932"
 
 data_files = pd.read_csv("../data/data_files.csv")
 
@@ -8,7 +8,7 @@ row = data_files[data_files["id"] == identifier]
 
 delta = 1
 
-epsilon = 0.1
+epsilon = 0
 
 savename = "{}_{}_{}_{}".format(identifier, row["meta_column"].iloc[0], delta, epsilon)
 
