@@ -2,6 +2,26 @@
 
 The main script used to perform equivalence testing is [equiv_test_vectorized.py](https://github.com/juliaolivieri/equivalence_testing/blob/main/scripts/equiv_test_vectorized.py). It assumes input file has been normalized (in this pipeline, it is normalized using DESeq2). 
 
+## Quick start with test data
+
+The [`test_data`](https://github.com/juliaolivieri/equivalence_testing/tree/main/test_data) contains example input files ([`data.csv`](https://github.com/juliaolivieri/equivalence_testing/blob/main/test_data/data.csv) and [`meta.csv`](https://github.com/juliaolivieri/equivalence_testing/blob/main/test_data/meta.csv)), and an example submission script [`run_test.sh`](https://github.com/juliaolivieri/equivalence_testing/blob/main/test_data/run_test.sh). 
+
+From the [`test_data`](https://github.com/juliaolivieri/equivalence_testing/tree/main/test_data) folder, run the script:
+
+`$ bash run_test.sh`
+
+This should create the following output files:
+
+Intermediary:
+
+1. [`test_condition_deseq2_results.csv`](https://github.com/juliaolivieri/equivalence_testing/blob/main/test_data/test_condition_deseq2_results.csv) (DESeq2 results for input data)
+1. [`test_deseq2_normalized_counts.csv`](https://github.com/juliaolivieri/equivalence_testing/blob/main/test_data/test_deseq2_normalized_counts.csv) (DESeq2 normalized matrix to be used in next step)
+
+Result:
+1. [`test_condition_1.0_results.csv`](https://github.com/juliaolivieri/equivalence_testing/blob/main/test_data/test_condition_1.0_results.csv) (Output file with different and equivalent p values)
+
+This test data has six samples and four genes. The results should show that two genes are significantly equivalent between groups, one is significantly different, and one is inconclusive.
+
 ## Input arguments
 
 1. `--savename`: Name to save output as
