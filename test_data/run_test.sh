@@ -31,7 +31,8 @@ b="python ../scripts/equiv_test_vectorized.py \
 	--infile $INFILE_EQUIV \
 	--delta $DELTA \
 	--meta ${META} \
-	--condition ${METACOLUMN}"
+	--condition ${METACOLUMN} \
+	--deseq2_results test_condition_deseq2_results.csv"
 
 echo $b
 eval $b
