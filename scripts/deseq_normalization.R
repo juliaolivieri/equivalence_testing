@@ -10,9 +10,9 @@ outpath <- args[4]
 ## from https://github.com/hbc/NGS_Data_Analysis_Course/blob/master/sessionIII/lessons/03_DEG_getting_started.md
 
 ## Load in data
-data <- read.csv(data_path, header=T, row.names=1) 
+data <- read.csv(data_path, header=T, row.names=1,check.names=FALSE) 
 
-meta <- read.csv(meta_path, header=T, row.names=1)
+meta <- read.csv(meta_path, header=T, row.names=1,check.names=FALSE)
 
 # subset data to only samples in metadata
 data <- data[rownames(meta)] 
