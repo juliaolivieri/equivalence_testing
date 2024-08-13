@@ -12,7 +12,9 @@ def get_args():
   parser.add_argument('--infile', type=str, help = 'path to file to analyze')
   parser.add_argument('--meta', type=str, help = 'metadata to analyze')
   parser.add_argument('--condition', type=str, help = 'column of metadata to use for differential analysis')
-  parser.add_argument('--delta', type=float, help = 'delta value to use', default=0.05)
+  parser.add_argument('--delta', type=float, help = 'delta value to use', default=1)
+  parser.add_argument('--deseq2_results', type=str, help = 'include path to deseq2 results file if you want plots', default="none")
+
   args = parser.parse_args()
   return args
 
@@ -79,20 +81,100 @@ def format_outdf(calc_df, delta):
     savecols = ["avg_group1_log2", "avg_group2_log2", "nnz_group1", "nnz_group2", 
             "eff_size", "avg_group1", "avg_group2", "fold_change", 
             "diff_pval", "equiv_pval", "diff_pval_adj", "equiv_pval_adj",
-            "sig_diff", "sig_equiv"]
+            "sig_diff", "sig_equiv", "category"]
     calc_df.rename({"muf" : "avg_group1_log2", "mug" : "avg_group2_log2"},axis=1,inplace=True)
-    calc_df["eff_size"] = calc_df["avg_group1_log2"] - calc_df["avg_group2_log2"]   
+    calc_df["eff_size"] =  calc_df["avg_group2_log2"] - calc_df["avg_group1_log2"]
     for i in range(1,3):
         calc_df["avg_group{}".format(i)] = 2**calc_df["avg_group{}_log2".format(i)]
-    calc_df["fold_change"] = calc_df["avg_group1"]/calc_df["avg_group2"] 
+    calc_df["fold_change"] = 2**calc_df["eff_size"]
     for v in ["diff", "equiv"]:
         calc_df["sig_" + v] = False
         calc_df.loc[calc_df["{}_pval_adj".format(v)] < 0.05, "sig_{}".format(v)] = True
     # include effect size filter on significance    
     calc_df.loc[(-delta <= calc_df["eff_size"]) & (calc_df["eff_size"] <= delta), "sig_diff"] = False    
     calc_df.loc[(calc_df["eff_size"] > delta) | (calc_df["eff_size"] < -delta), "sig_equiv"] = False 
-
+    calc_df["category"] = "inconclusive"
+    calc_df.loc[calc_df["sig_diff"],"category"] = "different"
+    calc_df.loc[calc_df["sig_equiv"],"category"] = "equivalent"
     return calc_df[savecols]
+
+def plot_deseq2(calc_df, deseq2_results, savepath):
+    if deseq2_results == "none":
+        return
+    deseq2 = pd.read_csv(deseq2_results,index_col = 0)
+    merged = pd.concat([calc_df, deseq2], join = "inner",axis=1)
+    
+    # sometimes interpreted as object; causes problems with correlation
+    merged["diff_pval_adj"] = pd.to_numeric(merged["diff_pval_adj"], errors='coerce')
+
+    plt.plot(merged["padj"],merged["diff_pval_adj"], marker = "o", linestyle="", alpha = 0.1)
+    plt.xlabel("DESeq2 adjusted p value")
+    plt.ylabel("adjusted differential expression p value")
+    plt.title("Pearson correlation {:.3f}".format(merged["padj"].corr(merged["diff_pval_adj"])))
+    plt.savefig("{}_deseq2_pvals.png".format(savepath), bbox_inches="tight", dpi=300)
+    plt.close()
+
+    col1 = "log2FoldChange"
+    col2 = "eff_size"
+    plt.plot(merged[col1],merged[col2], marker = "o", linestyle="", alpha = 0.1)
+    plt.title("Pearson correlation {:.3f}".format(merged[col1].corr(merged[col2])))
+
+    plt.xlabel("DESeq2 log2 fold change")
+    plt.ylabel("current log2 fold change")
+    plt.savefig("{}_deseq2_foldchange.png".format(savepath), bbox_inches="tight", dpi=300)
+    plt.close()
+
+def round_interval(interval):
+    return pd.Interval(round(interval.left, 1), round(interval.right, 1), closed=interval.closed)
+
+def plot_results(calc_df, savepath, delta):
+    k = 10
+    calc_df["avg"] = calc_df[["avg_group1", "avg_group2"]].mean(axis=1)
+    calc_df["depth_quantile"] = pd.qcut(calc_df['avg'], k, labels=False)
+    calc_df["depth_quantile_name"] = pd.qcut(calc_df['avg'], k)
+
+    # Apply the rounding function to each interval in the column
+    calc_df["depth_quantile_name_rounded"] = calc_df["depth_quantile_name"].apply(round_interval)
+
+    # find number of genes in each category at each sequencing depth
+    out_dict = {"quant_name" : [], "quant" : [], "num_genes" : [], "num_diff" : [], "num_equiv" : [], "num_incon" : []}
+    for quant, quantdf in calc_df.groupby("depth_quantile"):
+        out_dict["quant_name"].append(quantdf["depth_quantile_name_rounded"].astype(str)[0])
+        out_dict["quant"].append(quant)
+        out_dict["num_genes"].append(quantdf.shape[0])
+        out_dict["num_diff"].append(quantdf[quantdf["category"] == "different"].shape[0])
+        out_dict["num_equiv"].append(quantdf[quantdf["category"] == "equivalent"].shape[0])
+        out_dict["num_incon"].append(quantdf[quantdf["category"] == "inconclusive"].shape[0])
+    out = pd.DataFrame(out_dict)
+    out["frac_diff"] = out["num_diff"]/out["num_genes"]
+    out["frac_equiv"] = out["num_equiv"]/out["num_genes"]
+    out["frac_incon"] = out["num_incon"]/out["num_genes"]
+
+    # plot each category (with Wald binomial error bars, 95% confidence interval)
+    for cat in ["diff", "equiv", "incon"]:
+        plt.errorbar(out["quant"], out["frac_" + cat], yerr=1.96*np.sqrt(out["frac_" + cat]*(1 - out["frac_" + cat])/out["num_genes"]), fmt="o", label = cat)
+    plt.ylabel("fraction of genes in category")
+    plt.xlabel("log2 read depth range")
+    plt.xticks(out["quant"], out["quant_name"], rotation='vertical')
+    plt.legend()
+    plt.title("Fraction from each category by read depth")
+    plt.savefig("{}_readdepth.png".format(savepath), bbox_inches="tight", dpi=300)
+    plt.close()
+
+    calc_df["diff_pval_adj"] = pd.to_numeric(calc_df["diff_pval_adj"], errors='coerce')
+    plt.axhline(y=1.301,color="lightgray", label = "0.05", linestyle="--")
+    plt.axvline(x = delta, color = "lightgray", linestyle="-")
+    plt.axvline(x = -delta, color = "lightgray", linestyle="-", label = "+/- delta")
+    for cat, group in calc_df.groupby("category"):
+        plt.plot(group["eff_size"], -np.log10(group["diff_pval_adj"]), marker = "o", linestyle="",alpha=0.1, label = cat)
+
+    plt.legend()
+
+    plt.xlabel("log2 fold change")
+    plt.ylabel("-log10 difference p value")
+    plt.title("volcano plot")
+    plt.savefig("{}_volcano.png".format(savepath), bbox_inches="tight", dpi=300)
+    plt.close()
 
 def perform_full_analysis(infile, meta, condition, delta):
 
