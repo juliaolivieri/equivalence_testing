@@ -19,6 +19,10 @@ Intermediary:
 
 Result:
 1. [`test_condition_1.0_results.csv`](https://github.com/juliaolivieri/equivalence_testing/blob/main/test_data/test_condition_1.0_results.csv) (Output file with different and equivalent p values)
+1. [`test_condition_1.0_deseq2_pvals.png`](https://github.com/juliaolivieri/equivalence_testing/blob/main/test_data/test_condition_1.0_deseq2_pvals.png) (Plot showing correlation between DESeq2 difference p values and current difference p values)
+1. [`test_condition_1.0_deseq2_foldchange.png`](https://github.com/juliaolivieri/equivalence_testing/blob/main/test_data/test_condition_1.0_deseq2_foldchange.png) (Plot showing correlation between DESeq2 fold change and current fold change)
+1. [`test_condition_1.0_readdepth.png`](https://github.com/juliaolivieri/equivalence_testing/blob/main/test_data/test_condition_1.0_readdepth.png) (Plot showing how the fraction of different, equivalent, and inconclusive genes changes with sequencing depth)
+1. [`test_condition_1.0_volcano.png`](https://github.com/juliaolivieri/equivalence_testing/blob/main/test_data/test_condition_1.0_volcano.png) (Volcano plot of results colored by different, equivalent, inconclusive)
 
 This test data has six samples and four genes. The results should show that two genes are significantly equivalent between groups, one is significantly different, and one is inconclusive.
 
