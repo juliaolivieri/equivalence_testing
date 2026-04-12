@@ -24,7 +24,7 @@ Result:
 1. [`test_condition_1.0_readdepth.png`](https://github.com/juliaolivieri/equivalence_testing/blob/main/test_data/test_condition_1.0_readdepth.png) (Plot showing how the fraction of different, equivalent, and inconclusive genes changes with sequencing depth)
 1. [`test_condition_1.0_volcano.png`](https://github.com/juliaolivieri/equivalence_testing/blob/main/test_data/test_condition_1.0_volcano.png) (Volcano plot of results colored by different, equivalent, inconclusive)
 
-This test data has six samples and four genes. The results should show that two genes are significantly equivalent between groups, one is significantly different, and one is inconclusive.
+This test data has six samples and four genes. With the current minimum-effect differential test and equivalence test, the results should show that two genes are significantly equivalent between groups and two are significantly different.
 
 ## Input arguments
 
@@ -32,8 +32,8 @@ This test data has six samples and four genes. The results should show that two 
 1. `--outpath`: Folder to save output to
 1. `--infile`: .csv file with rows corresponding to genes and columns corresponding to samples.
 1. `--meta`: .csv file with rows corresponding to samples and columns corresponding to metadata about samples. All sample names in the first column should match column names in `infile` (though `meta` can contain a subset of the samples in `infile`). `condition` must be a column in the file that has two categories.  
-1. `--condition`: Column of the `meta` file that will be used to split the samples into two groups.
-1. `--delta`: Input a quantitative value to use as the cutoff for equivalence testing (so, the p value corresponds to the two groups having log2 average values within delta of each other). Default: `delta = 1`. This corresponds to 2x fold change.
+1. `--condition`: Column of the `meta` file that will be used to split the samples into two groups. The script requires exactly two groups, each with at least two samples.
+1. `--delta`: Input a quantitative value that defines the practical-effect boundary on the log2 scale. Default: `delta = 1`. This corresponds to a 2x fold change. The differential test asks whether the absolute group difference is significantly greater than `delta`, and the equivalence test asks whether the absolute group difference is significantly less than `delta`.
 
 ## Running instructions
 
@@ -53,6 +53,14 @@ Output will be created in `/Users/jolivie1/Desktop/Research/equivalence_testing_
 
 1. `<savename>_<condition>_<delta>_results.csv`: contains one row per gene. For each gene, includes information such as the adjusted difference and adjusted equivalence p value.
 
+## Statistical interpretation
+
+For each gene, the pipeline runs two complementary Welch-style tests on the log2-transformed normalized expression values:
+
+1. Differential test: `H0: |mu1 - mu2| <= delta` vs `H1: |mu1 - mu2| > delta`
+1. Equivalence test: `H0: |mu1 - mu2| >= delta` vs `H1: |mu1 - mu2| < delta`
+
+This means `delta` is built into both tests directly, rather than applying a standard difference test followed by an effect-size cutoff.
 
 
 

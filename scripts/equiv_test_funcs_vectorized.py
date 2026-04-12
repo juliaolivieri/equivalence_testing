@@ -30,6 +30,10 @@ def load_data(infile, meta, condition):
     groups = []
     for name, group in meta.groupby(condition):
         groups.append(list(group.index))
+    if len(groups) != 2:
+        raise ValueError("{} must have exactly two groups; found {}".format(condition, len(groups)))
+    if any(len(group) < 2 for group in groups):
+        raise ValueError("Each group must contain at least two samples for Welch's t-test")
 
     # Remove genes (rows) that have <= 1 nonzero entry
     nnz_plus = ((df != 0).sum(axis=1) > 1)
@@ -55,15 +59,16 @@ def calc_basic_stats(df, groups):
 def degrees_freedom_welch(df):
     # see methods for formula
     # deviation from simple nf + ng - 2 because we're not assuming equal variances
-    df["nu"] = (df["sf2"]/df["nf"] + df["sg2"]/df["ng"])**2/(df["sf2"]**2/(df["nf"]**2*(df["nf"] - 1)) + df["sg2"]**2/(df["nf"]**2*(df["ng"] - 1)))
+    df["nu"] = (df["sf2"]/df["nf"] + df["sg2"]/df["ng"])**2/(df["sf2"]**2/(df["nf"]**2*(df["nf"] - 1)) + df["sg2"]**2/(df["ng"]**2*(df["ng"] - 1)))
     #df["nu"] = df["nf"]  + df["ng"]  - 2
 
 def calc_t(df, delta):
     df["t{}".format(delta)] = ((df["muf"] - df["mug"]) + delta)/(np.sqrt((df["sf2"]/df["nf"]) + (df["sg2"]/df["ng"])))
 
-def calc_diff_pval(df):
-    df["cdf_t0"] = stats.t.cdf(df["t0"],df["nu"])
-    df["diff_pval"] = 2*pd.concat([df["cdf_t0"], 1 - df["cdf_t0"]],axis=1).min(axis=1)
+def calc_diff_pval(df, delta):
+    df["cdf_t_neg_delta"] = stats.t.cdf(df["t{}".format(-delta)], df["nu"])
+    df["cdf_t_delta"] = stats.t.cdf(df["t{}".format(delta)], df["nu"])
+    df["diff_pval"] = pd.concat([df["cdf_t_neg_delta"], 1 - df["cdf_t_delta"]],axis=1).min(axis=1)
 
 def calc_equiv_pval(df, delta):
     df["cdf_t1"] = stats.t.cdf(df["t{}".format(-delta)], df["nu"])
@@ -139,7 +144,7 @@ def plot_results(calc_df, savepath, delta):
     # find number of genes in each category at each sequencing depth
     out_dict = {"quant_name" : [], "quant" : [], "num_genes" : [], "num_diff" : [], "num_equiv" : [], "num_incon" : []}
     for quant, quantdf in calc_df.groupby("depth_quantile"):
-        out_dict["quant_name"].append(quantdf["depth_quantile_name_rounded"].astype(str)[0])
+        out_dict["quant_name"].append(quantdf["depth_quantile_name_rounded"].astype(str).iloc[0])
         out_dict["quant"].append(quant)
         out_dict["num_genes"].append(quantdf.shape[0])
         out_dict["num_diff"].append(quantdf[quantdf["category"] == "different"].shape[0])
@@ -193,7 +198,7 @@ def perform_full_analysis(infile, meta, condition, delta):
     calc_t(calc_df, -delta)
 
     # calculate p values
-    calc_diff_pval(calc_df)
+    calc_diff_pval(calc_df, delta)
     calc_equiv_pval(calc_df, delta)
 
     # adjust p values

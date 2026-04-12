@@ -1,18 +1,21 @@
 import pandas as pd
+import numpy as np
 
-identifier = "HLCA_column_alph_1000"
+identifier = "onco"
 
-DESEQ2 = False
+DESEQ2 = True
 
 data_files = pd.read_csv("../data/data_files.csv")
 
 row = data_files[data_files["id"] == identifier]
 
 delta = 1
+#delta = round(np.log2(3/2), 3)
+print("delta", delta)
 
-outpath_equiv = "~/Desktop/Research/equivalence_testing_output/scripts/output/equiv_test_vectorized/"
+outpath_equiv = "output/equiv_test_vectorized/"
 
-outpath_deseq = "~/Desktop/Research/equivalence_testing_output/scripts/output/deseq_normalization/{}".format(identifier)
+outpath_deseq = "output/deseq_normalization/{}".format(identifier)
 
 f = open("run_auto.sh","w")
 

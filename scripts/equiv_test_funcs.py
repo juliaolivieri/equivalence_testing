@@ -8,6 +8,11 @@ import pandas as pd
 import scipy.stats as stats
 import tqdm
 
+# Assuming calc_df["depth_quantile_name"] is the column with the intervals
+def round_interval(interval):
+    return pd.Interval(round(interval.left, 1), round(interval.right, 1), closed=interval.closed)
+
+
 def get_args():
   parser = argparse.ArgumentParser(description="perform equivalence test")
   parser.add_argument('--savename', type=str, help = 'dataname to process')
@@ -34,6 +39,72 @@ def log2_scale(df):
   df.iloc[:,:-1] = np.log2(df.iloc[:,:-1] + 1)
   return df
 
+"""def _se_df(x1, x2, equal_var=False):
+    x1, x2 = np.asarray(x1), np.asarray(x2)
+    n1, n2 = len(x1), len(x2)
+    s1, s2 = np.var(x1, ddof=1), np.var(x2, ddof=1)
+    if equal_var:
+        sp2 = ((n1-1)*s1 + (n2-1)*s2) / (n1 + n2 - 2)
+        se  = np.sqrt(sp2 * (1/n1 + 1/n2))
+        df  = n1 + n2 - 2
+    else:
+        se  = np.sqrt(s1/n1 + s2/n2)
+        df  = (s1/n1 + s2/n2)**2 / ((s1/n1)**2/(n1-1) + (s2/n2)**2/(n2-1))
+    return se, df
+
+def perform_t_tests(group1_vals, group2_vals, delta, epsilon = .1, equal_var = False):
+    
+    #Returns:
+    #    diff_pval  : p-value for H0: |mu1-mu2| <= delta  vs  H1: |mu1-mu2| > delta
+    #    equiv_pval : p-value for H0: |mu1-mu2| >= delta  vs  H1: |mu1-mu2| < delta (TOST)
+    
+    # add noise to avoid divide by zero
+
+    noise1 = np.random.uniform(-epsilon, epsilon,len(group1_vals))
+    noise2 = np.random.uniform(-epsilon, epsilon,len(group2_vals))
+
+    group1_vals = [ x + y for x, y in zip(group1_vals, noise1)]
+    group2_vals = [ x + y for x, y in zip(group2_vals, noise2)]
+
+    x1, x2 = np.asarray(group1_vals), np.asarray(group2_vals)
+    n1, n2 = len(x1), len(x2)
+    m1, m2 = x1.mean(), x2.mean()
+    s1, s2 = np.var(x1, ddof=1), np.var(x2, ddof=1)
+    diff = m1 - m2
+
+    if equal_var:
+        sp2 = ((n1-1)*s1 + (n2-1)*s2) / (n1 + n2 - 2)
+        se  = np.sqrt(sp2*(1/n1 + 1/n2))
+        df  = n1 + n2 - 2
+    else:
+        se  = np.sqrt(s1/n1 + s2/n2)
+        df  = (s1/n1 + s2/n2)**2 / ((s1/n1)**2/(n1-1) + (s2/n2)**2/(n2-1))  # Welch–Satterthwaite
+
+    # ---- Difference / minimum-effect: |diff| > delta ----
+    # Right tail: H0: diff <= delta  vs  H1: diff > delta
+    t_right = (diff - delta) / se
+    p_right = 1 - stats.t.cdf(t_right, df)
+
+    # Left tail: H0: diff >= -delta vs  H1: diff < -delta  (equivalently -diff > delta)
+    t_left  = (-diff - delta) / se
+    p_left  = 1 - stats.t.cdf(t_left, df)
+
+    diff_pval = min(p_right, p_left)
+
+    # ---- Equivalence (TOST): |diff| < delta ----
+    # Lower bound: H0: diff <= -delta vs H1: diff > -delta  (greater)
+    t_lower = (diff + delta) / se
+    p_lower = 1 - stats.t.cdf(t_lower, df)
+
+    # Upper bound: H0: diff >=  delta vs H1: diff <  delta  (less)
+    t_upper = (diff - delta) / se
+    p_upper = stats.t.cdf(t_upper, df)
+
+    equiv_pval = max(p_lower, p_upper)
+
+    return diff_pval, equiv_pval"""
+
+
 def perform_t_tests(group1_vals, group2_vals, delta, epsilon = .1):
 
     # add noise to avoid divide by zero
@@ -50,8 +121,15 @@ def perform_t_tests(group1_vals, group2_vals, delta, epsilon = .1):
     #  print("ERROR\n{}\n{}".format(group1_vals, group2_vals))
     # perform standard t-test (testing for difference)
     # consider switching to Welch's t-test (current assumes equal variances)
-    diff_pval = stats.ttest_ind(a=group1_vals, b = group2_vals).pvalue
+
+    # OLD DIFF PVAL
+    #diff_pval = stats.ttest_ind(a=group1_vals, b = group2_vals).pvalue
     
+
+    p1 = stats.ttest_ind(group1_vals, [x + delta for x in group2_vals], alternative="greater").pvalue
+    p2 = stats.ttest_ind(group2_vals, [x + delta for x in group1_vals], alternative="greater").pvalue
+    diff_pval = min(p1, p2)
+
     if math.isnan(diff_pval):
       print("is nan")
       print(group1_vals)
@@ -157,12 +235,12 @@ def process_out_df(out_df, delta):
 def plot_results(out_df, outpath, dataname, delta):
   plt.hist(out_df["diff_pval_adj"])
   plt.title("{}\ndiff_pval_adj".format(dataname))
-  plt.savefig("{}{}_{}_diff_pval.png".format(outpath, dataname, delta))
+  plt.savefig("{}{}_{}_diff_pval.png".format(outpath, dataname, delta), bbox_inches="tight")
   plt.close()
   
   plt.hist(out_df["equiv_pval_adj"])
   plt.title("{}\nequiv_pval_adj".format(dataname))
-  plt.savefig("{}{}_{}_equiv_pval.png".format(outpath, dataname, delta))
+  plt.savefig("{}{}_{}_equiv_pval.png".format(outpath, dataname, delta), bbox_inches="tight")
   plt.close()
 
   sub = out_df[(out_df["sig_diff"] == False) & (out_df["sig_equiv"] == False)]
@@ -181,8 +259,86 @@ def plot_results(out_df, outpath, dataname, delta):
   plt.ylabel("equiv_pval")
   plt.title("{}\ndelta: {}".format(dataname,delta))
   plt.legend()
-  plt.savefig("{}{}_{}_comparison.png".format(outpath, dataname, delta))
+  plt.savefig("{}{}_{}_comparison.png".format(outpath, dataname, delta), bbox_inches="tight")
   plt.close()
+
+  out_df["category"] = "inconclusive"
+  out_df.loc[out_df["sig_equiv"],"category"] = "equivalent"
+  out_df.loc[out_df["sig_diff"],"category"] = "different"
+
+  color_map = {
+      "different": u'#1f77b4',
+      "equivalent": u'#ff7f0e',
+      "inconclusive": u'#2ca02c'
+  }
+
+  plt.axhline(y=1.301,color="lightgray", label = "0.05", linestyle="--")
+  plt.axvline(x = 1, color = "lightgray", linestyle="-")
+  plt.axvline(x = -1, color = "lightgray", linestyle="-", label = "+/- delta")
+  for cat in ["inconclusive", "equivalent", "different"]:
+      group = out_df[out_df["category"] == cat]
+      #plt.plot(results["eff_size"], -np.log10(results["diff_pval_adj"]), marker = "o", linestyle="",alpha=0.1, label = "all data")
+
+      sc = plt.plot(group["eff_size"], -np.log10(group["diff_pval_adj"]), marker = "o", linestyle="",alpha=0.2, label = cat, color = color_map[cat])
+
+  #leg = plt.legend(*sc.legend_elements(), title="Groups")
+  #for lh in leg.legendHandles:
+  #    lh.set_alpha(1)   
+
+  plt.xlabel("log2 fold change")
+  plt.ylabel("-log10 difference p value")
+  vc = out_df["category"].value_counts()
+  for x in ["different", "equivalent", "inconclusive"]:
+    if x not in vc:
+      vc[x] = 0
+  print("vc", vc)
+
+  plt.title("{} volcano plot\ndifferent: {}, equivalent: {}, inconclusive: {}".format(dataname, vc["different"], vc["equivalent"], vc["inconclusive"]))
+
+  plt.savefig("{}{}_{}_volcano.png".format(outpath, dataname, delta), bbox_inches="tight")
+  plt.close()
+
+  calc_df = out_df
+  calc_df["avg_log2"] = calc_df[["avg_group1_log2", "avg_group2_log2"]].mean(axis=1)
+  calc_df["avg"] = calc_df[["avg_group1", "avg_group2"]].mean(axis=1)
+  k = 10
+  calc_df["depth_quantile"] = pd.qcut(calc_df['avg'], k, labels=False)
+  calc_df["depth_quantile_name"] = pd.qcut(calc_df['avg'], k)
+
+
+  # Apply the rounding function to each interval in the column
+  calc_df["depth_quantile_name_rounded"] = calc_df["depth_quantile_name"].apply(round_interval)
+
+
+  out_dict = {"quant_name" : [], "quant" : [], "num_genes" : [], "num_diff" : [], "num_equiv" : [], "num_incon" : []}
+
+
+  for quant, quantdf in calc_df.groupby("depth_quantile"):
+      print(quant)
+      print(quantdf)
+      print(quantdf["depth_quantile_name_rounded"].astype(str).iloc[0])
+      out_dict["quant_name"].append(quantdf["depth_quantile_name_rounded"].astype(str).iloc[0])
+      out_dict["quant"].append(quant)
+      out_dict["num_genes"].append(quantdf.shape[0])
+      out_dict["num_diff"].append(quantdf[quantdf["category"] == "different"].shape[0])
+      out_dict["num_equiv"].append(quantdf[quantdf["category"] == "equivalent"].shape[0])
+      out_dict["num_incon"].append(quantdf[quantdf["category"] == "inconclusive"].shape[0])
+  out = pd.DataFrame(out_dict)
+  out["frac_diff"] = out["num_diff"]/out["num_genes"]
+  out["frac_equiv"] = out["num_equiv"]/out["num_genes"]
+  out["frac_incon"] = out["num_incon"]/out["num_genes"]
+
+  cat_dict = {"diff" : "different", "equiv" : "equivalent", "incon" : "inconclusive"}
+  for cat in ["diff", "equiv", "incon"]:
+      #plt.plot(out["quant"], out["frac_" + cat], marker = "o", linestyle = "", label = cat)
+      plt.errorbar(out["quant"], out["frac_" + cat], yerr=1.96*np.sqrt(out["frac_" + cat]*(1 - out["frac_" + cat])/out["num_genes"]), fmt="o", label = cat_dict[cat],color=color_map[cat_dict[cat]])
+  plt.ylabel("fraction of genes in category")
+  plt.xlabel("log2 read depth range")
+  plt.xticks(out["quant"], out["quant_name"], rotation='vertical')
+  plt.legend()
+  plt.title(f"{dataname}\nFraction from each category by read depth")
+  plt.savefig("{}{}_{}_seq_depth.png".format(outpath, dataname, delta), bbox_inches="tight")
+
 
 def summarize_df_significance(out_df, delta, verbose = True):
   num_genes = out_df.shape[0]
