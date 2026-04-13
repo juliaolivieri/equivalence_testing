@@ -14,6 +14,8 @@ def get_args():
   parser.add_argument('--condition', type=str, help = 'column of metadata to use for differential analysis')
   parser.add_argument('--delta', type=float, help = 'delta value to use', default=1)
   parser.add_argument('--deseq2_results', type=str, help = 'include path to deseq2 results file if you want plots', default="none")
+  parser.add_argument('--low_count_threshold', type=float, help='flag genes as low information when both group means before log2(x+1) are below this threshold', default=5)
+  parser.add_argument('--min_nonzero_per_group', type=int, help='flag genes as low information when either group has fewer than this many nonzero samples', default=2)
 
   args = parser.parse_args()
   return args
@@ -40,17 +42,29 @@ def load_data(infile, meta, condition):
     df = df.loc[nnz_plus[nnz_plus].index,]
 
     # log 2 scale all entries (after adding pseudocount of 1)
-    df = np.log2(df + 1)
-    return df, groups
+    raw_df = df.copy()
+    log_df = np.log2(df + 1)
+    return raw_df, log_df, groups
 
-def calc_basic_stats(df, groups):
-    calc_df = pd.concat([df[groups[0]].mean(axis=1), # mean group 1
-            df[groups[1]].mean(axis=1), # mean group 2
-            df[groups[0]].var(axis=1), # sample variance group 1
-            df[groups[1]].var(axis=1), # sample variance group 2
-            (df[groups[0]] != 0).sum(axis=1), # nnz group 1
-            (df[groups[1]] != 0).sum(axis=1) # nnz group 1
-            ],axis=1).rename({0 : "muf", 1 : "mug", 2 : "sf2", 3 : "sg2", 4 : "nnz_group1", 5 : "nnz_group2"},axis=1)
+def calc_basic_stats(raw_df, log_df, groups):
+    calc_df = pd.concat([log_df[groups[0]].mean(axis=1), # mean group 1 on log scale
+            log_df[groups[1]].mean(axis=1), # mean group 2 on log scale
+            log_df[groups[0]].var(axis=1), # sample variance group 1
+            log_df[groups[1]].var(axis=1), # sample variance group 2
+            (raw_df[groups[0]] != 0).sum(axis=1), # nnz group 1 before log
+            (raw_df[groups[1]] != 0).sum(axis=1), # nnz group 2 before log
+            raw_df[groups[0]].mean(axis=1), # mean group 1 before log
+            raw_df[groups[1]].mean(axis=1) # mean group 2 before log
+            ],axis=1).rename({
+                0 : "muf",
+                1 : "mug",
+                2 : "sf2",
+                3 : "sg2",
+                4 : "nnz_group1",
+                5 : "nnz_group2",
+                6 : "avg_group1_raw",
+                7 : "avg_group2_raw",
+            },axis=1)
     calc_df["nf"] = len(groups[0])
     calc_df["ng"] = len(groups[1])
     return calc_df
@@ -63,30 +77,41 @@ def degrees_freedom_welch(df):
     #df["nu"] = df["nf"]  + df["ng"]  - 2
 
 def calc_t(df, delta):
-    df["t{}".format(delta)] = ((df["muf"] - df["mug"]) + delta)/(np.sqrt((df["sf2"]/df["nf"]) + (df["sg2"]/df["ng"])))
+    df["t{}".format(delta)] = ((df["mug"] - df["muf"]) + delta)/(np.sqrt((df["sf2"]/df["nf"]) + (df["sg2"]/df["ng"])))
+
 
 def calc_diff_pval(df, delta):
     df["cdf_t_neg_delta"] = stats.t.cdf(df["t{}".format(-delta)], df["nu"])
     df["cdf_t_delta"] = stats.t.cdf(df["t{}".format(delta)], df["nu"])
-    df["diff_pval"] = pd.concat([df["cdf_t_neg_delta"], 1 - df["cdf_t_delta"]],axis=1).min(axis=1)
+    df["diff_pval"] = pd.concat([1 - df["cdf_t_neg_delta"], df["cdf_t_delta"]],axis=1).min(axis=1)
 
 def calc_equiv_pval(df, delta):
     df["cdf_t1"] = stats.t.cdf(df["t{}".format(-delta)], df["nu"])
     df["cdf_t2"] = 1 - stats.t.cdf(df["t{}".format(delta)], df["nu"])
     df["equiv_pval"] = pd.concat([df["cdf_t1"], df["cdf_t2"]],axis=1).max(axis=1)
 
-def adj_pvals(df,col):
+def adj_pvals(df, col, low_information=None):
     df[col + "_adj"] = None
-    
-    # don't calculate adjusted p values if all of the p values are NA
-    if df[col].dropna().shape[0] > 0:
-        df.loc[~df[col].isna(),col + "_adj"] = multitest.multipletests(df[col].dropna(), method="fdr_bh")[1]
+
+    # exclude low-information genes from FDR pool so they don't inflate correction
+    if low_information is not None:
+        mask = ~df[col].isna() & ~low_information
+    else:
+        mask = ~df[col].isna()
+
+    if mask.sum() > 0:
+        df.loc[mask, col + "_adj"] = multitest.multipletests(df.loc[mask, col], method="fdr_bh")[1]
+
+def annotate_low_information(calc_df, low_count_threshold, min_nonzero_per_group):
+    low_abundance = (calc_df["avg_group1_raw"] < low_count_threshold) & (calc_df["avg_group2_raw"] < low_count_threshold)
+    sparse_groups = (calc_df["nnz_group1"] < min_nonzero_per_group) | (calc_df["nnz_group2"] < min_nonzero_per_group)
+    calc_df["low_information"] = low_abundance | sparse_groups
 
 def format_outdf(calc_df, delta):
-    savecols = ["avg_group1_log2", "avg_group2_log2", "nnz_group1", "nnz_group2", 
+    savecols = ["avg_group1_log2", "avg_group2_log2", "avg_group1_raw", "avg_group2_raw", "nnz_group1", "nnz_group2",
             "eff_size", "avg_group1", "avg_group2", "fold_change", 
             "diff_pval", "equiv_pval", "diff_pval_adj", "equiv_pval_adj",
-            "sig_diff", "sig_equiv", "category"]
+            "sig_diff", "sig_equiv", "test_category", "category", "low_information"]
     calc_df.rename({"muf" : "avg_group1_log2", "mug" : "avg_group2_log2"},axis=1,inplace=True)
     calc_df["eff_size"] =  calc_df["avg_group2_log2"] - calc_df["avg_group1_log2"]
     for i in range(1,3):
@@ -95,12 +120,12 @@ def format_outdf(calc_df, delta):
     for v in ["diff", "equiv"]:
         calc_df["sig_" + v] = False
         calc_df.loc[calc_df["{}_pval_adj".format(v)] < 0.05, "sig_{}".format(v)] = True
-    # include effect size filter on significance    
-    calc_df.loc[(-delta <= calc_df["eff_size"]) & (calc_df["eff_size"] <= delta), "sig_diff"] = False    
-    calc_df.loc[(calc_df["eff_size"] > delta) | (calc_df["eff_size"] < -delta), "sig_equiv"] = False 
-    calc_df["category"] = "inconclusive"
-    calc_df.loc[calc_df["sig_diff"],"category"] = "different"
-    calc_df.loc[calc_df["sig_equiv"],"category"] = "equivalent"
+
+    calc_df["test_category"] = "inconclusive"
+    calc_df.loc[calc_df["sig_diff"],"test_category"] = "different"
+    calc_df.loc[calc_df["sig_equiv"],"test_category"] = "equivalent"
+    calc_df["category"] = calc_df["test_category"]
+    calc_df.loc[calc_df["low_information"], "category"] = "low_information"
     return calc_df[savecols]
 
 def plot_deseq2(calc_df, deseq2_results, savepath):
@@ -142,7 +167,7 @@ def plot_results(calc_df, savepath, delta):
     calc_df["depth_quantile_name_rounded"] = calc_df["depth_quantile_name"].apply(round_interval)
 
     # find number of genes in each category at each sequencing depth
-    out_dict = {"quant_name" : [], "quant" : [], "num_genes" : [], "num_diff" : [], "num_equiv" : [], "num_incon" : []}
+    out_dict = {"quant_name" : [], "quant" : [], "num_genes" : [], "num_diff" : [], "num_equiv" : [], "num_incon" : [], "num_low_info" : []}
     for quant, quantdf in calc_df.groupby("depth_quantile"):
         out_dict["quant_name"].append(quantdf["depth_quantile_name_rounded"].astype(str).iloc[0])
         out_dict["quant"].append(quant)
@@ -150,13 +175,15 @@ def plot_results(calc_df, savepath, delta):
         out_dict["num_diff"].append(quantdf[quantdf["category"] == "different"].shape[0])
         out_dict["num_equiv"].append(quantdf[quantdf["category"] == "equivalent"].shape[0])
         out_dict["num_incon"].append(quantdf[quantdf["category"] == "inconclusive"].shape[0])
+        out_dict["num_low_info"].append(quantdf[quantdf["category"] == "low_information"].shape[0])
     out = pd.DataFrame(out_dict)
     out["frac_diff"] = out["num_diff"]/out["num_genes"]
     out["frac_equiv"] = out["num_equiv"]/out["num_genes"]
     out["frac_incon"] = out["num_incon"]/out["num_genes"]
+    out["frac_low_info"] = out["num_low_info"]/out["num_genes"]
 
     # plot each category (with Wald binomial error bars, 95% confidence interval)
-    for cat in ["diff", "equiv", "incon"]:
+    for cat in ["diff", "equiv", "incon", "low_info"]:
         plt.errorbar(out["quant"], out["frac_" + cat], yerr=1.96*np.sqrt(out["frac_" + cat]*(1 - out["frac_" + cat])/out["num_genes"]), fmt="o", label = cat)
     plt.ylabel("fraction of genes in category")
     plt.xlabel("log2 read depth range")
@@ -171,7 +198,8 @@ def plot_results(calc_df, savepath, delta):
     plt.axvline(x = delta, color = "lightgray", linestyle="-")
     plt.axvline(x = -delta, color = "lightgray", linestyle="-", label = "+/- delta")
     for cat, group in calc_df.groupby("category"):
-        plt.plot(group["eff_size"], -np.log10(group["diff_pval_adj"]), marker = "o", linestyle="",alpha=0.1, label = cat)
+        if cat != "low_information":
+            plt.plot(group["eff_size"], -np.log10(group["diff_pval_adj"]), marker = "o", linestyle="",alpha=0.1, label = cat)
 
     plt.legend()
 
@@ -181,19 +209,18 @@ def plot_results(calc_df, savepath, delta):
     plt.savefig("{}_volcano.png".format(savepath), bbox_inches="tight", dpi=300)
     plt.close()
 
-def perform_full_analysis(infile, meta, condition, delta):
+def perform_full_analysis(infile, meta, condition, delta, low_count_threshold=5, min_nonzero_per_group=2):
 
     # load data
-    df, groups = load_data(infile, meta, condition)
+    raw_df, log_df, groups = load_data(infile, meta, condition)
 
     # calculate mean, variance, nnz, etc
-    calc_df = calc_basic_stats(df, groups)
+    calc_df = calc_basic_stats(raw_df, log_df, groups)
 
     # Calculate degrees of freedom
     degrees_freedom_welch(calc_df)
 
-    # calculate 3 necessary t values
-    calc_t(calc_df, 0)
+    # calculate t statistics at +/- delta boundaries 
     calc_t(calc_df, delta)
     calc_t(calc_df, -delta)
 
@@ -201,9 +228,12 @@ def perform_full_analysis(infile, meta, condition, delta):
     calc_diff_pval(calc_df, delta)
     calc_equiv_pval(calc_df, delta)
 
-    # adjust p values
+    # annotate low-information genes before FDR correction
+    annotate_low_information(calc_df, low_count_threshold, min_nonzero_per_group)
+
+    # adjust p values (excluding low-information genes from FDR pool)
     for v in ["diff", "equiv"]:
-        adj_pvals(calc_df,v + "_pval")
+        adj_pvals(calc_df, v + "_pval", calc_df["low_information"])
 
     calc_df.sort_values("diff_pval", inplace=True)
 

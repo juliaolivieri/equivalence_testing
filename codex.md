@@ -1,0 +1,7 @@
+The test data is now outdated. I'd like test data that's "intuitive" but has mostly inconclusive (maybe a few equivalent or different)
+
+Got claude to do this - you can read over it, but don't need to do it:
+Notes for next time: why is the adjusted p value 1 for difference? Are we adjusting p values including those removed for low information? Shouldn't we not do that? DESeq2 seemed to be finding a lot more differences than we did, which is what I'm concerned about. I want to be conservative but not too conservative. Of course, if there truly isn't enough evidence for a 2x fold change difference, I don't want to find it. But these values do seem pretty clear: group 1: 2848.993242	3090.779399	2481.829849	4003.882813	group 2: 483.9371225	456.1325876	564.9422177	641.2229762
+
+Previous commands (no need to re-run):
+This is a project to do some simple differential and equivalent testing for bulk RNA-seq data. You can see the overall project description in Equivalence_Testing_write_up.pdf. The main analysis is done in scripts/equiv_test_funcs_vectorized.py. Can you read over it, and see if it generally does what it should do? Can you find any errors? I want both differential and equivalent analysis to be kind of "inverses" of each other, so for differential expression there shouldn't be a standard test for any difference and then a cutoff by effect size: the effect size should be baked into the statistical test.
