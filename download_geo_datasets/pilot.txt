@@ -1,0 +1,106 @@
+  gse_accession,title,geo_url,organism,assay_type,release_date,total_samples,cond
+  ition_names,num_conditions,usable_comparison_exists,num_usable_comparisons,comp
+  arison_description,replicates_by_condition,min_replicates_per_condition,supplem
+  entary_file_names,matrix_type_assessment,metadata_sufficiency,inclusion_status,
+  confidence,notes,reason_for_exclusion_or_uncertainty
+  GSE297857,HFD-inducued metabolic syndrome is promoted by JNK7b isoform,https://
+  www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE297857,Mus musculus,Expression
+  profiling by high throughput sequencing,2026-02-27,6,WT; Rxra S65A
+  mutant,2,yes,1,Liver under HFD: WT vs Rxra S65A mutant,WT=3; Rxra S65A
+  mutant=3,3,GSE297857_Counts.txt.gz;
+  GSE297857_TPM.txt.gz,raw_counts_confirmed,clear,eligible,high,Simple 2-group
+  bulk liver RNA-seq with explicit counts file and clear sample labels,
+  GSE311564,A reduced TBX5-dependent gene regulatory network links atrial
+  fibrillation and heart failure [RNA-seq: Tbx5_LV_KO],https://
+  www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE311564,Mus musculus,Expression
+  profiling by high throughput sequencing,2025-11-30,6,Control left ventricle;
+  Tbx5 KO left ventricle,2,yes,1,Left ventricle: Control vs Tbx5 KO,Control=3;
+  Tbx5 KO=3,3,GSE311564_RAW.tar,unclear,clear,candidate,medium,Bulk RNA-seq
+  subseries with straightforward grouping and replication,No explicit gene-level
+  count matrix is listed on the series page
+  GSE287677,Transcriptome profiling of starved Actr3 KO mIMCD3 cells,https://
+  www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE287677,Mus musculus,Expression
+  profiling by high throughput sequencing,2025-10-16,12,Actr3 control; Actr3 KO;
+  Actr3-Ift88 dKO; Actr3 KO + ciliobrevin D,4,yes,3,At minimum: control vs Actr3
+  KO; control vs dKO; Actr3 KO vs Actr3 KO + ciliobrevin D,control=3; Actr3 KO=3;
+  dKO=3; Actr3 KO +
+  CB=3,3,GSE287677_Normalized_counts_file.tabular.txt.gz,not_raw_counts,clear,exc
+  lude,high,Design and replication are usable,Only a normalized counts file is
+  explicitly provided
+  GSE292289,H3K79 methylation and H3K36 trimethylation synergistically regulate
+  gene expression in pluripotent stem cells,https://www.ncbi.nlm.nih.gov/geo/
+  query/acc.cgi?acc=GSE292289,Mus musculus,Expression profiling by high
+  throughput sequencing; Genome binding/occupancy profiling by high throughput
+  sequencing,2025-07-04,94,WT; DOT1LCI; SETD2CI; DCI; WT neural day21; DCI neural
+  day21; DCI DMSO; DCI VP; WT serumLIF; DOT1LCI serumLIF; SETD2CI serumLIF; DCI
+  serumLIF,12,yes,4,At minimum: WT vs DOT1LCI; WT vs SETD2CI; WT vs DCI; WT
+  neural day21 vs DCI neural day21,WT=3; DOT1LCI=3; SETD2CI=3; DCI=3; WT neural
+  day21=3; DCI neural day21=3; DCI drug
+  subgroups=2,2,GSE292289_RAW.tar,unclear,partially_clear,candidate,medium,RNA
+  samples are clearly labeled on the SuperSeries page,Only a BW tarball is listed
+  at the SuperSeries level
+  GSE262799,UUO-rUUO single population RNA seq, Denby lab 2019,https://
+  www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE262799,Mus musculus,Expression
+  profiling by high throughput sequencing,2025-03-27,46,Sham; UUO; RUUO across
+  LTL+ F4/80+ PDGFRB+ CD31+ cell populations,3,yes,8,Within each cell type: Sham
+  vs UUO and Sham vs RUUO,Sham=4; UUO=4; RUUO=4 per cell
+  type,4,GSE262799_FPKM_table_ALL2.csv.gz,not_raw_counts,clear,exclude,high,Bulk
+  sorted-population RNA-seq with good replication,Listed processed matrix is FPKM
+
+  GSE249016,Epigenetic profiling in adult brain after prenatal BPA exposure,https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?
+  acc=GSE249016,Mus musculus,Expression profiling by high throughput sequencing; Methylation profiling by high throughput
+  sequencing; Genome binding/occupancy profiling by high throughput sequencing,2024-05-29,45,Male PFC Ctrl; Male PFC BPA;
+  Female PFC Ctrl; Female PFC BPA,4,yes,2,Male PFC Ctrl vs BPA and Female PFC Ctrl vs BPA,Male Ctrl=3; Male BPA=3; Female
+  Ctrl=3; Female BPA=3,3,GSE249016_RAW.tar,unclear,clear,candidate,medium,RNA-seq subset is simple and well annotated,A
+  gene-level count matrix is not explicitly named on the page
+  GSE224704,Bulk transcriptomic profiling of dermal macrophage subtypes,https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?
+  acc=GSE224704,Mus musculus,Expression profiling by high throughput sequencing,2024-12-25,15,S1; S2_5; S3 macrophage
+  subtypes,3,no,0,No clear baseline/control condition is stated,S1=5; S2_5=5;
+  S3=5,5,GSE224704_RAW.tar,unclear,clear,exclude,high,Bulk RNA-seq and paired sampling are clear,No clear control-versus-
+  experimental baseline
+  GSE248697,single nucleus RNA-seq for mice septal area,https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE248697,Mus
+  musculus,Expression profiling by high throughput sequencing,2024-07-02,6,septal-area nuclei samples,1,no,0,Not
+  applicable,not applicable,0,,unclear,ambiguous,exclude,high,Mouse study is within date window,Single-nucleus RNA-seq
+  GSE291154,Effect of pressure-overload on cardiac endothelial cells in Balb/c mice,https://www.ncbi.nlm.nih.gov/geo/query/
+  acc.cgi?acc=GSE291154,Mus musculus,Expression profiling by high throughput sequencing,2025-09-30,3,Sham heart; TAC
+  heart,2,no,0,Sham vs TAC is underpowered on the series page,Sham=2; TAC=1,1,GSE291154_Balb_scRNAseq_ref_README.txt;
+  GSE291154_RAW.tar; GSE291154_all_LEC_barcodes.csv.gz;
+  GSE291154_expression_data_value.xlsx,unclear,clear,exclude,high,Condition labels are obvious,Series is single-cell and has
+  only one TAC sample
+  GSE305888,Effect of Aiolos on virtual memory T cell differentiation and function,https://www.ncbi.nlm.nih.gov/geo/query/
+  acc.cgi?acc=GSE305888,Mus musculus,Expression profiling by high throughput sequencing; Genome binding/occupancy profiling
+  by high throughput sequencing,2025-11-10,18,WT TVM; Aiolos KO TVM; Naive WT; WT; Aiolos KO,5,yes,2,WT TVM vs Aiolos KO
+  TVM; WT vs Aiolos KO,WT TVM=4; Aiolos KO TVM=4; Naive WT=4; WT=3; Aiolos
+  KO=3,3,GSE305888_RAW.tar,unclear,clear,candidate,medium,RNA-seq samples are plainly labeled,SuperSeries page lists only a
+  BW tarball
+  GSE224556,Z-DNA underlies the target choice of Aire by facilitating promoter poising [RNA-seq],https://
+  www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE224556,Mus musculus,Expression profiling by high throughput sequencing,2024-
+  03-11,30,B6 WT; B6 Aire KO; NOD WT; NOD Aire KO; PBS vs spermidine; DMSO vs topotecan; Nfe2l2 wt vs flox,7,yes,5,Multiple
+  clean pairwise contrasts exist,many 2-3 replicate groups,2,GSE224556_RAW.tar,raw_counts_likely,clear,exclude,high,Would
+  otherwise be strong,Public release date March 11 2024 is outside the last-2-years window relative to April 12 2026
+  GSE240693,Circadian-affected tissue specificity is linked to aging and longevity,https://www.ncbi.nlm.nih.gov/geo/query/
+  acc.cgi?acc=GSE240693,Mus musculus,Expression profiling by high throughput sequencing,2024-06-03,144,Control vs sleep
+  deprivation across cerebellum forebrain liver and kidney at multiple circadian times,2,yes,24,For the sleep-deprivation
+  subseries CON vs SD at each tissue-timepoint pair,CON=2 and SD=2 per tissue-timepoint
+  pair,2,GSE240693_RAW.tar,unclear,clear,candidate,medium,Bulk RNA-seq with many clean pairings,SuperSeries is complex and
+  the page does not explicitly name a gene-level count matrix
+  GSE185899,Expression profiles of macrophages,https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE185899,Mus
+  musculus,Expression profiling by high throughput sequencing; Genome binding/occupancy profiling by high throughput
+  sequencing,2024-03-31,48,Wild-type BMDM M0/M2; WT colon macrophage; E4BP4 transgenic colon macrophage; E4BP4 knockout
+  RAW264.7; control RAW264.7; M0/M1/M2 RAW264.7,8,yes,4,Multiple clean contrasts exist,most
+  groups=3,3,GSE185899_RAW.tar,unclear,clear,exclude,high,Contains several usable bulk RNA-seq comparisons,Public release
+  date March 31 2024 is outside the last-2-years window relative to April 12 2026
+  GSE297245,Prenatal and postnatal effects of gestational immune activation on synaptic and neurodevelopmental pathways via
+  epigenetic mechanisms (RNA-seq),https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE297245,Mus musculus,Expression
+  profiling by high throughput sequencing,2025-12-19,84,Groups A-G defined by prenatal/postnatal MIA and cross-fostering
+  state,7,yes,3,Potentially usable contrasts include Group A vs B A vs C and A vs D,6 mice per group but each mouse has 2
+  RNA replicates,6,GSE297245_RAW.tar,unclear,partially_clear,candidate,low,Group definitions are spelled out on the
+  page,Control mapping is not simple and the two RNA replicates per mouse need resolution
+  GSE282280,DNA methylation-sensitive transcription factors and bivalency orchestrate transposon expression in the absence
+  of DNA methylation.,https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE282280,Mus musculus,Genome binding/occupancy
+  profiling by high throughput sequencing; Expression profiling by high throughput sequencing,2025-08-08,93,Spg WT; Spg
+  Dnmt3CKO/KO; Spc WT; Spc Dnmt3CKO/KO; germ WT; germ Dnmt3CKO/KO; germ Nrf1KO/KO; germ double mutant,8,yes,4,At minimum Spg
+  WT vs Dnmt3CKO/KO; Spc WT vs Dnmt3CKO/KO; germ WT vs Dnmt3CKO/KO; germ WT vs Nrf1KO/KO,Spg WT=3; Spg Dnmt3CKO/KO=3; Spc
+  WT=4; Spc Dnmt3CKO/KO=4; germ WT=3; germ Dnmt3CKO/KO=3; germ Nrf1KO/KO=3; germ double
+  mutant=3,3,GSE282280_RAW.tar,unclear,partially_clear,candidate,medium,Main page exposes clearly replicated RNA
+  comparisons,Only a BW/BROADPEAK tarball is listed at the SuperSeries level

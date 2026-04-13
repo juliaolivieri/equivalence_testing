@@ -1,0 +1,116 @@
+GEO bulk RNA-seq screening handoff
+
+Date:
+2026-04-12
+
+Primary output:
+- geo_bulk_rnaseq_screening.csv
+
+What was done:
+- Read codex.md and used it as the screening spec.
+- Started from the existing pilot.txt in the workspace, which already contained earlier screening work.
+- Expanded the screen by querying recent GEO mouse series and then checking GEO series text pages plus FTP supplement listings.
+- Built and iteratively updated geo_bulk_rnaseq_screening.csv.
+- Brought the table to 100 screened GSE rows total.
+- Used conservative labeling. When a count matrix or grouping was not explicit, rows were left as candidate or exclude rather than promoted.
+
+Current CSV totals:
+- eligible: 21
+- candidate: 43
+- exclude: 36
+
+Important limitation:
+- This is still not an exhaustive census of the full last-2-years GEO search space.
+- It is a substantial partial screen, not a complete final screening pass.
+- The most recent expansion prioritized moving the table to 100 rows and preserving conservative reasoning, not fully resolving every candidate.
+
+How series were judged:
+- Required organism: Mus musculus.
+- Required assay: bulk RNA-seq or clearly standard bulk expression profiling by high throughput sequencing.
+- Excluded sc/snRNA-seq, spatial, microarray, and obvious non-bulk designs.
+- Preferred one clear baseline/control and at least one perturbation condition.
+- Required at least one usable comparison with >=2 biological replicates per condition.
+- Strongest eligible rows had explicit count-like supplements named as counts, raw_counts, gene_count, merged_counts, HTSeq counts, or similar.
+- Rows with only FPKM/TPM/log2CPM/normalized/de-results were usually excluded.
+- Rows with only RAW.tar or ambiguous processed files were often kept as candidate if the biological design looked promising.
+
+Highest-confidence eligible series:
+- GSE297857
+- GSE319325
+- GSE326335
+- GSE309219
+- GSE315575
+- GSE247781
+- GSE327455
+- GSE317172
+- GSE239606
+- GSE239601
+- GSE300143
+
+Additional eligible series, but slightly more caution advised:
+- GSE313842
+- GSE294305
+- GSE292505
+- GSE282895
+- GSE281745
+- GSE280336
+- GSE322752
+- GSE281491
+- GSE291447
+- GSE266472
+
+Why the caution on some eligible rows:
+- Some rely on file names strongly implying raw counts rather than an explicit statement on the GEO page.
+- Some have more complex designs with multiple tissues, timepoints, or treatment arms.
+- GSE291447 and GSE266472 are eligible in the current CSV, but they are more complex than the simple 2-group studies and should be parsed carefully before downstream modeling.
+
+What the next agent should do first:
+1. Use geo_bulk_rnaseq_screening.csv as the source of truth for status, notes, and uncertainty.
+2. Start downstream work from eligible rows only.
+3. Prefer the simplest, highest-confidence eligible rows first for any equivalence or differential-expression prototype.
+4. Before analysis, verify the exact expression matrix format for each chosen GSE from the listed supplement files.
+5. Confirm whether files are gene-level counts, sample-by-gene matrices, or per-sample count files that need merging.
+6. Confirm sample-to-condition mapping from GEO sample titles/metadata before building any design matrix.
+
+Recommended priority order for downstream DE/equivalence testing:
+- First tier: GSE297857, GSE319325, GSE326335, GSE309219, GSE315575, GSE247781
+- Second tier: GSE327455, GSE317172, GSE239606, GSE239601, GSE300143
+- Third tier: GSE313842, GSE294305, GSE292505, GSE282895, GSE281745, GSE280336, GSE322752
+- Complex tier: GSE281491, GSE291447, GSE266472
+
+What was learned about ambiguity patterns:
+- Many promising GEO series only expose RAW.tar on the series page, without an explicit gene-level count matrix.
+- Many processed supplements are only FPKM, TPM, log2CPM, normalized counts, or DE result tables.
+- SuperSeries often hide the usable RNA-seq contrast inside a more complex umbrella series.
+- Some titles say bulk RNA-seq while the design text or supplement naming creates assay ambiguity.
+- Some biologically interesting studies have enough replication but no clean baseline/control comparison.
+
+Interpretation guidance for candidate rows:
+- Candidate does not mean likely eligible by default.
+- Candidate usually means one of:
+  - the biological comparison looks usable but count-matrix status is unclear
+  - the count files may exist only inside RAW.tar and were not opened
+  - metadata are partially clear but still need sample-level confirmation
+  - the study is more complex than a clean two-group analysis and needs manual reduction
+
+Interpretation guidance for exclude rows:
+- Excluded rows include true ineligible studies and also studies that failed one practical requirement for the planned workflow.
+- Common exclusion reasons:
+  - non-bulk assay
+  - non-mouse or mixed-organism content
+  - no clean control-versus-perturbation comparison
+  - no usable comparison with >=2 replicates per condition
+  - only normalized/non-count matrices exposed
+  - metadata too ambiguous
+  - outside the 2-year window relative to 2026-04-12
+
+Files in this workspace relevant to handoff:
+- geo_bulk_rnaseq_screening.csv
+- handoff_summary.txt
+- codex.md
+- pilot.txt
+
+Bottom line:
+- The workspace now contains a 100-row partial GEO screen with 21 eligible series.
+- There is enough material to begin downstream differential-expression and equivalence-analysis prototyping immediately.
+- The safest starting point is the simple, high-confidence eligible group listed above.
